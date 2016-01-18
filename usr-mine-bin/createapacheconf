@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [[ -z $1 || -z $2 ]]; then 
+echo "Usage : $0 subdomain domain"
+exit
+fi
+
+TARGET=$1
+DOMAIN=$2
+
+echo "Target : $TARGET"
+echo "Domain : $DOMAIN"
+
+APACHECONF="/etc/apache2/sites-available/$TARGET.$DOMAIN.conf"
+echo $APACHECONF
+
+echo "<virtualhost *:80>" > $APACHECONF
+echo "" >> $APACHECONF
+echo "ServerName $TARGET.$DOMAIN" >> $APACHECONF 
+echo "" >> $APACHECONF
+echo "LogLevel warn" >> $APACHECONF
+echo "ErrorLog /var/log/apache2/websites/$TARGET.$DOMAIN-error.log" >> $APACHECONF
+echo "CustomLog /var/log/apache2/websites/$TARGET.$DOMAIN-access.log combined" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "DocumentRoot /var/www/non-secure/websites/$DOMAIN/$TARGET" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "<Directory /var/www/non-secure/websites/$DOMAIN/$TARGET/>" >> $APACHECONF
+echo "  Options -Indexes FollowSymLinks" >> $APACHECONF
+echo "  DirectoryIndex index.html index.php" >> $APACHECONF
+echo "</Directory>" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "</virtualhost>" >> $APACHECONF
+
+echo a2ensite $TARGET.$DOMAIN.conf 

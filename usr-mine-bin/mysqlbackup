@@ -1,0 +1,69 @@
+# mysql backup
+# version 1.02 - 7 août 2010
+
+#!/bin/bash
+
+LOG=/var/log/mysqlbackup.log
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+SQLFILEDIR=/backups/emeric/auto-backup/mysql
+SQLFILE=${SQLFILEDIR}/${TIMESTAMP}_mysqlbackup_all_databases.sql
+mysqldump --opt --verbose --user=root --password=IhL6mCw5aMVQo2Cr --all-databases > ${SQLFILE} 2> /dev/null
+
+echo "MYSQL backup saved all databases" >> $LOG
+# Remove file older than 365 days
+AGE=365
+#find $SQLFILEDIR -iname "*_mysqlbackup_all_databases.sql.bz2" -type f -mtime +$AGE -print |grep -v '^\.\/\.'
+find $SQLFILEDIR -iname "*_mysqlbackup_all_databases.sql.bz2" -type f -mtime +$AGE -exec rm -f {} \; 
+
+cat /usr/mine/bin/mysqlbackup.dblist | while read dbname
+do
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+SQLFILE=${SQLFILEDIR}/${TIMESTAMP}_mysqlbackup_${dbname}.sql
+mkdir -p ${SQLFILEDIR}
+echo "Dump mysql database '${dbname}' to ${SQLFILE}"
+# dump the selected db 
+mysqldump --opt --verbose --user=root --password=IhL6mCw5aMVQo2Cr ${dbname} > ${SQLFILE} 2> /dev/null
+
+# removed the line "-- Dump completed on" that is the only difference between two dumps of the same set of data (useful to compare the sql file with md5sum)
+cat ${SQLFILE} | grep -v "\-\- Dump completed on " > ${SQLFILE}.tmp
+mv ${SQLFILE}.tmp ${SQLFILE}
+
+# create tmp file
+TMPDB=/tmp/$$db.list
+# erase its content
+0> ${TMPDB}
+# compute md5sum for this SQLFILE
+MYMD5=`md5sum ${SQLFILE} | awk '{print $1}'`
+#echo "mymd5 : $MYMD5"
+
+# Un Bzip2 all exports
+bzip2 -d ${SQLFILEDIR}/* 2>&1 > /dev/null 
+
+# find other dumps and compare with them (if this latest dump is identical to previous ones, keep only the new one)
+ls ${SQLFILEDIR}/*${dbname}* | while read files
+do
+#echo "$files"
+md5sum $files | grep ${MYMD5} | grep -v ${SQLFILE} >> $TMPDB
+done
+
+# remove similar files if any 
+cat ${TMPDB} | while read file2rm
+do
+F2RM=`echo ${file2rm} | awk '{print $2}'`
+echo "Removing similar backup ${F2RM}"
+rm -f ${F2RM}
+done
+
+rm -f ${TMPDB}
+
+# cannot compare gzip files (if the same file is gzip at different time, the md5 signature are differents)
+#gzip ${SQLFILE} 
+
+done
+
+# Bzip2 all files
+bzip2 ${SQLFILEDIR}/* 
+
+# write work done in log file
+TIMESTAMP=`date +%d/%m/%Y-%H:%M:%S`
+echo "MYSQL backup completed on ${TIMESTAMP}" >> $LOG

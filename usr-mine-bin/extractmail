@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $1 == "" ]; then
+echo "usage: $0 txtfile"
+fi
+MAILS=mails.list
+#cat $1 | perl -wne'while(/[\w\.\-]+@[\w\.\-]+\w+/g){print "$&\n"}' 
+cat $1 | grep -Eo '\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b' | sort | uniq > $MAILS

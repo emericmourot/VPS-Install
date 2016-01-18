@@ -1,0 +1,67 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:      confluence 
+### END INIT INFO
+
+# confluence init script
+# March 2010
+# Emeric Mourot
+
+JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.17/jre
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+INSTALLDIR=/usr/local/confluence
+NAME=confluence
+SNAME=spamassassin
+DESC="Confluence Wiki"
+PIDFILE="/var/run/$NAME.pid"
+
+if [ ! -f $INSTALLDIR/bin/startup.sh ]; then
+    echo "$DESC is not installed in $INSTALLDIR" 
+    exit 0
+fi
+
+case "$1" in
+  start)
+        if [ -f $PIDFILE ]; then
+	PID=$(cat $PIDFILE)
+	echo "$DESC is already running (PID $PID) !"
+	exit 0
+	fi
+	echo "Starting $DESC"
+	$INSTALLDIR/bin/startup.sh
+	# set pidfile 
+	PID=$(ps ux | awk '/-Djava.util.logging.config.file=\/usr\/local\/confluence\/conf\/logging.properties/ && !/awk/ {print $2}')
+	echo $PID > $PIDFILE
+	echo "$DESC started (PID $PID)"
+	;;
+
+  stop)
+	if [ ! -f $PIDFILE ]; then
+        echo "No $DESC instance is already running, can't stop !"
+        exit 0
+        fi
+	echo "Stopping $DESC"
+	$INSTALLDIR/bin/shutdown.sh
+	rm $PIDFILE
+	echo "$DESC stopped"
+	;;
+
+  reload|force-reload)
+	echo -n "Reloading $DESC: "
+	echo "Not supported for $NAME."
+	;;
+
+  restart)
+	echo -n "Restarting $DESC: "
+	echo "$NAME restarted"
+	;;
+
+  *)
+	N=/etc/init.d/$SNAME
+	echo "Usage: $N {start|stop|restart}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

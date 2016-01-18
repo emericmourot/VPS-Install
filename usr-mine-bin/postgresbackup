@@ -1,0 +1,53 @@
+#!/bin/bash
+
+LOG=/var/log/postgresbackup.log
+SQLFILEDIR=/backup/auto-backup/postgres
+mkdir -p $SQLFILEDIR
+
+cat /usr/mine/bin/postgresbackup.dblist | while read DBNAME USER
+do
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+#DBNAME=${line%% *}
+#USER=${line# *}
+SQLFILE=${SQLFILEDIR}/${TIMESTAMP}_postgresbackup_${DBNAME}.sql
+echo "Dump postgres database '${DBNAME}' with user '${USER}' to ${SQLFILE}"
+# dump the selected db 
+#pg_dump dbname | gzip > filename.gz
+pg_dump -U ${USER} ${DBNAME} > ${SQLFILE} 2> /dev/null
+exit
+
+# removed the line "-- Dump completed on" that is the only difference between two dumps of the same set of data (useful to compare the sql file with md5sum)
+cat ${SQLFILE} | grep -v "\-\- Dump completed on " > ${SQLFILE}
+
+# create tmp file
+TMPDB=/tmp/$$db.list
+# erase its content
+0> ${TMPDB}
+# compute md5sum for this SQLFILE
+MYMD5=`md5sum ${SQLFILE} | awk '{print $1}'`
+#echo "mymd5 : $MYMD5"
+# find other dumps and compare with them (if this latest dump is identical to previous ones, keep only the new one)
+ls ${SQLFILEDIR}/*${dbname}* | while read files
+do
+#echo "$files"
+md5sum $files | grep ${MYMD5} | grep -v ${SQLFILE} >> $TMPDB
+done
+
+# remove similar files if any 
+cat ${TMPDB} | while read file2rm
+do
+F2RM=`echo ${file2rm} | awk '{print $2}'`
+echo "Removing similar backup ${F2RM}"
+rm -f ${F2RM}
+done
+
+rm -f ${TMPDB}
+
+# cannot compare gzip files (if the same file is gzip at different time, the md5 signature are differents)
+#gzip ${SQLFILE} 
+
+done
+
+# write work done in log file
+TIMESTAMP=`date +%d/%m/%Y-%H:%M:%S`
+echo "MYSQL backup completed on ${TIMESTAMP}" >> $LOG

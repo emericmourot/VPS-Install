@@ -1,0 +1,18 @@
+#!/bin/bash
+
+mkdir websites
+cd websites
+
+#wget -nc -r -i ../websitekwanalyse.list -A '.html,.htm'
+
+find -type f -iname "*.htm?" | while read page
+do
+lynx -dump $page > $page.txt
+done
+
+ls | while read site
+do
+cat `find $site -type f -iname "*.txt"` | grep -vf ../websitekwanalyse.pattern1  > $site/$site.txt
+#cat $site/$site.txt | tr -sc '[:alpha:]' '\n' | grep -vf ../websitekwanalyse.pattern2 | sort | uniq -c | sort -k 1nr > $site/$site.kw
+cat $site/$site.txt | sed 'y/áàâäçéèêëîïìôöóùúüñÂÀÄÇÉÈÊËÎÏÔÖÙÜÑ/aaaaceeeeiiiooouuunAAACEEEEIIOOUUN/' | tr -sc '[:alpha:]' '\n' | grep -vf ../websitekwanalyse.pattern2 | sort | uniq -c | sort -k 1nr > $site/$site.kw
+done

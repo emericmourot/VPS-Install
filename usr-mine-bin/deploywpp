@@ -1,0 +1,21 @@
+#!/bin/bash
+
+WPDIR=/var/softs-installed/wordpress/
+THEMES=$WPDIR/themes/
+
+WEBDIR=/var/www/non-secure/websites
+TARGET=`pwd`
+IFS='/'; 
+for dir in $TARGET
+do 
+#echo "$dir"
+counte=`echo ${dir##*.} | wc -m`
+count=`echo ${dir%.*} | wc -m`
+#echo "> ${dir%.*} > $count"
+#echo "> ${dir##*.} > $counte"
+#[ $count != $counte && $counte = 4 ] && echo ">>$dir<<"; 
+[ $count != $counte ] && DOMAIN=$dir; 
+done
+
+echo $DOMAIN
+exit

@@ -1,0 +1,58 @@
+#!/bin/bash
+#set -x
+
+WEBSITEDIR=/var/www/non-secure/websites
+
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+DATEPREFIX=`date +%Y%m%d-`
+TMP=/tmp
+TMP1=$TMP/$$
+SQLBUDIR=mysql-backup
+
+find $WEBSITEDIR -name "wp-config.php" | while read config 
+do 
+DIR=`dirname $config`
+echo "-----------------------------------------------------------------------------------------------"
+echo "Backing up MySQL database for WP site at ${DIR}"
+
+#exec `awk -F"[()']" '/^define/{printf "%s=\"%s\"\n", $3, $5;}' < $config`
+#echo "DB NAME : $DB_NAME"
+#echo "DB USER: $DB_USER"
+#echo "DB PASSWD : $DB_PASSWORD"
+
+WPDBNAME=`cat $config | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat $config | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat $config | grep DB_PASSWORD | cut -d \' -f 4`
+echo "DB NAME : $WPDBNAME"
+echo "DB USER: $WPDBUSER"
+echo "DB PASSWD : $WPDBPASS"
+
+mkdir -p ${DIR}/${SQLBUDIR}/
+SQLFILE=${DIR}/${SQLBUDIR}/${DATEPREFIX}-mysqldump-${WPDBNAME}.sql
+echo $SQLFILE
+echo "Dump mysql database '${WPDBNAME}' to ${SQLFILE}"
+# dump the selected db 
+echo mysqldump --opt --verbose --user=${WPDBUSER} --password=${WPDBPASS} ${WPDBNAME} > ${SQLFILE} 2> /dev/null
+gzip -9 ${SQLFILE}
+ 
+# get wordpress version
+rm ${DIR}/version-wordpress-*
+WPVERSION=`cat $DIR/wp-includes/version.php | grep "wp_version =" | awk '{print $3}'` 
+#echo ${WPVERSION:1:5}
+touch ${DIR}/version-wordpress-${WPVERSION:1:5}
+
+# get apache version
+rm ${DIR}/version-apache2-*
+APCHVERSION=`apt-cache policy apache2 | grep "Installed" | awk '{print $2;}'`
+touch ${DIR}/version-apache2-${APCHVERSION}
+
+# get mysql version
+rm ${DIR}/version-mysqlserver-*
+SQLVERSION=`apt-cache policy mysql-common | grep "Installed" | awk '{print $2;}'`
+touch ${DIR}/version-mysqlserver-${SQLVERSION}
+
+#cd $TMP
+#tar cvfz "$OUTPUTDIR/$ARCHNAME.tgz" $ARCHNAME
+#rm -rf $WORKINGDIR 
+#rm -f $TMP1
+done

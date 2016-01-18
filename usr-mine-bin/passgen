@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo 
+echo "*** 10 ***"
+/usr/bin/pwgen -B -s 10 8
+echo 
+echo "*** 12 ***"
+/usr/bin/pwgen -B -s 12 6
+echo 
+echo "*** 16 ***"
+/usr/bin/pwgen -B -s 16 4
+echo 

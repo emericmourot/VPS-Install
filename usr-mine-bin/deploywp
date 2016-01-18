@@ -1,0 +1,146 @@
+#!/bin/bash
+
+#set -x 
+
+DEBUG=0
+
+MYSQL=`which mysql`
+MYSQLDUMP=`which mysqldump`
+AWK=$(which awk)
+GREP=$(which grep)
+
+_notdebug()
+{
+    # I prefer using if/then for readability, but this is an unusual case
+    [ "${DEBUG}" -ne "1" ] && $@
+} 
+
+if [[ -z $1 || -z $2 ]]; then 
+echo "Usage : $0 theme_name prefix (subdomain and domain from pwd)"
+echo "        prefix = internal 3 letters prefix"
+exit 1
+fi
+
+THEME=$1
+PREFIX=${2,,}
+DIR=`pwd`
+SUBDOMAIN=${DIR##*/}
+DOMAIN=`basename $(dirname "$DIR")`
+
+echo "Theme name : $THEME"
+echo "Target     : $SUBDOMAIN"
+echo "Domain     : $DOMAIN"
+
+WPDIR=/var/softs-installed/wordpress
+THEMES=$WPDIR/themes/
+PLUGINS=$WPDIR/plugins/
+_notdebug tar xvfz $WPDIR/wordpress-fr-latest.tgz > /dev/null
+_notdebug mv wordpress/* .
+_notdebug rm -rf wordpress
+
+if [ -n "$1" ] ; then
+echo "Installing theme $1"
+_notdebug mkdir wp-content/themes/$1
+_notdebug cp -r $THEMES/$1/$1/* wp-content/themes/$1
+#echo "cp $THEMES/$1/$1-demo.xml ."
+_notdebug cp $THEMES/$1/$1-demo.xml .
+#echo "Done"
+fi
+
+echo "Installing plugins"
+_notdebug cp -r $PLUGINS/* wp-content/plugins/
+_notdebug rm -rf wp-content/plugins/hello.php
+_notdebug rm -rf wp-content/plugins/akismet/
+#echo "Done"
+
+echo "Installing $1 docs"
+_notdebug mkdir docs
+#echo "Copying $THEMES/$1/docs to docs"
+_notdebug cp -r $THEMES/$1/docs/* docs
+#echo "Done"
+
+echo "Creating admin shortcut $1"
+_notdebug ln -s wp-admin admin
+ 
+echo "Creating robots.txt (NO ACCESS)" 
+ROBOTS=/tmp/$$.robots
+echo "User-agent: *" > $ROBOTS 
+echo "Disallow: /" >> $ROBOTS 
+_notdebug cp $ROBOTS robots.txt
+rm $ROBOTS
+
+_notdebug chown -R www-data:www-data `pwd` 
+
+#APACHECONF="/etc/apache2/sites-available/$SUBDOMAIN.$DOMAIN.conf"
+APACHECONF=/tmp/$$.apacheconf
+
+echo "<virtualhost 91.121.164.213:80>" > $APACHECONF
+echo "" >> $APACHECONF
+echo "ServerName $SUBDOMAIN.$DOMAIN" >> $APACHECONF 
+echo "" >> $APACHECONF
+echo "LogLevel warn" >> $APACHECONF
+echo "ErrorLog /var/log/apache2/websites/$SUBDOMAIN.$DOMAIN-error.log" >> $APACHECONF
+echo "CustomLog /var/log/apache2/websites/$SUBDOMAIN.$DOMAIN-access.log combined" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "DocumentRoot /var/www/non-secure/client-websites/$DOMAIN/$SUBDOMAIN" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "<Directory /var/www/non-secure/client-websites/$DOMAIN/$SUBDOMAIN/>" >> $APACHECONF
+echo "  Order allow,deny" >> $APACHECONF
+echo "  Allow from all" >> $APACHECONF
+echo "  AllowOverride All" >> $APACHECONF
+echo "  Options -Indexes FollowSymLinks" >> $APACHECONF
+echo "  DirectoryIndex index.html index.php" >> $APACHECONF
+echo "</Directory>" >> $APACHECONF
+echo "" >> $APACHECONF
+echo "</virtualhost>" >> $APACHECONF
+
+_notdebug cp $APACHECONF "/etc/apache2/sites-available/$SUBDOMAIN.$DOMAIN.conf"
+_notdebug a2ensite $SUBDOMAIN.$DOMAIN.conf 
+rm $APACHECONF
+
+# SQL
+echo "Initialisating DB..."
+#CREATE DATABASE `wordpress-geo-preprod` ;
+if [[ $SUBDOMAIN == www ]]
+then
+DBNAME="wordpress-$PREFIX-prod"
+fi
+if [[ $SUBDOMAIN == *preprod* ]] 
+then 
+DBNAME="wordpress-$PREFIX-preprod"
+fi
+if [[ $SUBDOMAIN == *dev* ]] 
+then 
+DBNAME="wordpress-$PREFIX-dev"
+fi
+echo "DB NAME : $DBNAME"
+DBUSER="wp-$PREFIX-user"
+echo "DB USER : $DBUSER"
+DBPWD=`pwgen -s 16`
+echo "DB PWD  : $DBPWD"
+echo "Backuping $DBNAME"
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+BACKUPSQLFILE=$TIMESTAMP-$DBNAME-backup.sql
+if [ -f $BACKUPSQLFILE ]
+then 
+BACKUPSQLFILE=$TIMESTAMP-$DBNAME-backup.sql.$$ 
+fi
+$MYSQLDUMP --user=root --password=IhL6mCw5aMVQo2Cr --databases $DBNAME > $BACKUPSQLFILE 
+#echo "Deleting all tables from $DBNAME"
+#TABLES=$($MYSQL -u root -pIhL6mCw5aMVQo2Cr $DBNAME -e 'show tables' | $AWK '{ print $1}' | $GREP -v '^Tables' )
+ 
+#for t in $TABLES
+#do
+#	echo "Deleting $t table from $DBNAME database..."
+#	$MYSQL -u root -pIhL6mCw5aMVQo2Cr $DBNAME -e "drop table $t"
+#done
+
+# You must backtick-quote the database name since it contains -. You'll probably have to backslash escape the backticks in bash so they don't cause execution.
+SQL1="CREATE DATABASE IF NOT EXISTS \`$DBNAME\`;"
+#SQL2="GRANT ALL ON  \`$DBNAME\` TO '$DBUSER'@'localhost' IDENTIFIED BY '$DBPWD';"
+#SQL2="CREATE USER IF NOT EXISTS '$DBUSER'@'localhost' IDENTIFIED BY '$DBPWD';"
+#Q3="GRANT USAGE ON * . * TO '$DBUSER'@'localhost' IDENTIFIED BY '$DBPWD' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;"
+#SQL3="GRANT SELECT , INSERT , UPDATE , DELETE , CREATE , ALTER ON \`$DBNAME\`.* TO '$DBUSER'@'localhost';"
+#SQL4="FLUSH PRIVILEGES;"
+#echo "$SQL2"
+#$MYSQL --user=root --password=IhL6mCw5aMVQo2Cr -e "${SQL1} ${SQL2} ${SQL3} ${SQL4}"

@@ -1,0 +1,3 @@
+#! /bin/bash
+
+python /usr/mine/bin/wetransfer.py -u $1

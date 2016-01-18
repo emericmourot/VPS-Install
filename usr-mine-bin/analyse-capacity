@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "<< MASTER>>"
+df -h
+echo "<< MAIL >>"
+du -hcs /var/vmail/*
+echo "<< CLOUD >>"
+du -hcs /var/www/owncloud/data/*
+echo "<< BACKUP >>"
+du -hcs /backups/* 

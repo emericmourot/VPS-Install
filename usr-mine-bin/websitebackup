@@ -1,0 +1,65 @@
+#!/bin/bash
+#set -x
+
+WEBSITEDIR=/var/www/non-secure/websites
+OUTPUTDIR=/var/www/non-secure/websites/88.190.30.40/websites-backup
+
+mkdir -p $OUTPUTDIR
+
+TIMESTAMP=`date +%Y%m%d-%H%M%S`
+DATEPREFIX=`date +%Y%m%d-`
+TMP=/tmp
+TMP1=$TMP/$$
+
+# website list format, one site per line
+# domain SPACE subdomain SPACE dbname SPACE (exclude dir or files separated by SPACE)
+
+cat website.list | while read line 
+do
+# tokenize the line
+set -- $line
+DOMAIN=$1
+SUBDOMAIN=$2
+DBNAME=$3
+SOURCEDIR=$WEBSITEDIR/$DOMAIN/$SUBDOMAIN/
+ARCHNAME=$DATEPREFIX$SUBDOMAIN.$DOMAIN
+WORKINGDIR=$OUTPUTDIR/$ARCHNAME
+rm -rf $WORKINGDIR 0> /dev/null
+mkdir $WORKINGDIR
+#echo $WORKINGDIR
+FIRSTPART="$DOMAIN $SUBDOMAIN $DBNAME"
+#echo ${#FIRSTPART}
+# get list of files and dirs to exclude
+EXCLUDE=`echo ${line:${#FIRSTPART}}` 
+# replace spaces by newline
+echo "${EXCLUDE// /$'\n'}" > $TMP1 
+#cat $TMP1
+echo "Copy $SOURCEDIR to $WORKINGDIR/$SUBDOMAIN"
+rsync -avz --exclude-from $TMP1 "$SOURCEDIR" "$WORKINGDIR/$SUBDOMAIN" 1> /dev/null
+
+# sql dump
+SQLFILE=${WORKINGDIR}/${TIMESTAMP}-mysqldump-${DBNAME}.sql
+#echo $SQLFILE
+echo "Dump mysql database '${DBNAME}' to ${SQLFILE}"
+# dump the selected db 
+mysqldump --opt --verbose --user=root --password=6N1BIqzNNn381wQV ${DBNAME} > ${SQLFILE} 2> /dev/null
+gzip ${SQLFILE}
+ 
+# get wordpress version
+WPVERSION=`cat $SOURCEDIR/wp-includes/version.php | grep "wp_version =" | awk '{print $3}'` 
+#echo ${WPVERSION:1:5}
+touch ${WORKINGDIR}/version-wordpress-${WPVERSION:1:5}
+
+# get apache version
+APCHVERSION=`apt-cache policy apache2 | grep "Installed" | awk '{print $2;}'`
+touch ${WORKINGDIR}/version-apache2-${APCHVERSION}
+
+# get mysql version
+SQLVERSION=`apt-cache policy mysql-common | grep "Installed" | awk '{print $2;}'`
+touch ${WORKINGDIR}/version-mysqlserver-${SQLVERSION}
+
+cd $TMP
+#tar cvfz "$OUTPUTDIR/$ARCHNAME.tgz" $ARCHNAME
+#rm -rf $WORKINGDIR 
+rm -f $TMP1
+done

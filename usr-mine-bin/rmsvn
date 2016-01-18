@@ -1,0 +1,2 @@
+#! /bin/bash
+find -iname ".svn" | while read file ; do echo "Delete $file"; rm -rf "$file" ; done
