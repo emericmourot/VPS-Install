@@ -9,10 +9,10 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # update packages
-_re "apt-get update" "done apt-get update" "apt-get update failed"
+_re "apt-get -y update" "done apt-get update" "apt-get update failed"
 
 # upgrade
-$SSHCMD "apt-get upgrade"
-_e "done apt-get upgrade"
-$SSHCMD "apt-get dist-upgrade"
-_e "done apt-get dist-upgrade"
+_re "apt-get -y upgrade" "done apt-get upgrade" "apt-get upgrade failed"
+
+# upgrade
+_re "apt-get -y dist-upgrade" "done apt-get dist-upgrade" "apt-get dist-upgradefailed"

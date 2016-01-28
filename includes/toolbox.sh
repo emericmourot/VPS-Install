@@ -73,18 +73,26 @@ function _ce {
 }
 
 # remote execute and catch error if any
-# @args sshcmd remotecmd message_ok message_error
+# @args remotecmd message_ok message_error
 function _re {
-    result=`$1 $2 2>&1`
-    _ce `echo $?` "$3" "$4" "$result"
+    if [ -z "$SSHCMD" ] ; then
+        _error_exit "SSHCMD not set"
+    fi
+    _d "remote exec: [$SSHCMD $1 2>&1]"
+    result=`$SSHCMD "$1" 2>&1`
+    _ce `echo $?` "$2" "$3" "$result"
 }
 
 # _re and exit on error
-# @args sshcmd remotecmd message_ok message_error
+# @args remotecmd message_ok message_error
 function _re_exit {
-    result=`$1 $2 2>&1`
+    if [ -z "$SSHCMD" ] ; then
+        _error_exit "SSHCMD not set"
+    fi
+    _d "remote exec & exit: [$SSHCMD $1 2>&1]"
+    result=`$SSHCMD "$1" 2>&1`
     errno=`echo $?`
-    _ce $errno "$3" "$4" "$result"
+    _ce $errno "$2" "$3" "$result"
     if [ "$errno" -ne "0" ] ; then
         exit 0
      fi

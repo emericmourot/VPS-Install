@@ -2,7 +2,7 @@
 
 # <START OF CONFIG>
 config_app_name=docker-install
-config_default_install=no
+config_default_install=yes
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
@@ -14,9 +14,11 @@ source "var.cfg" 2>&1 /dev/null
 # last version installation
 
 # check if docker is already installed
-docker_version=`$SSHCMD "docker --version 2>&1 | head -n 1 | awk  '{print $3}'"`
+docker_version=`$SSHCMD "docker --version 2> /dev/null | head -n 1 | awk  '{print $3}'"`
 # remove trailing ,
 docker_version=${docker_version%,*}
+
+_d "Docker version <${docker_version}> detected"
 
 if [ -z "$docker_version" ] ; then
     # install from wget (@see https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md)

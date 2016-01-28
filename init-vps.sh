@@ -113,21 +113,37 @@ function _wconfig {
     # new line
     echo "" >> "$var_cfg"
 
-    echo "shortname=$shortname" >> "$var_cfg"
-    echo "hostname=$hostname" >> "$var_cfg"
-    echo "username=$username" >> "$var_cfg"
-
-    # keep logged data and moved to the fresly created dir
-    mv "$dir/$logfile" "$hostdir/actions.log"
-    logfile="$hostdir/actions.log"
-    echo "logfile='$hostdir/actions.log'" >> "$var_cfg"
-
     # if SSHCMD has not already being set
     if [ -z "$SSHCMD" ] ; then
         SSHCMD="ssh ${username}@${hostname}"
         _d "[ssh cmd   = $SSHCMD]"
     fi
     echo "SSHCMD=\"$SSHCMD\"" >> "$var_cfg"
+
+    # new line
+    echo "" >> "$var_cfg"
+
+    echo "# hostname details" >> "$var_cfg"
+    # write info about the host
+    ip=$(dig $hostname +short)
+    #mem=$($SSHCMD "awk '/^MemTotal:/{print $2}' /proc/meminfo")
+    #distinfo=$($SSHCMD "uname -a")
+    #echo "memory=$mem" >> "$var_cfg"
+    #echo "dist=$distinfo" >> "$var_cfg"
+
+    echo "# hostname: $hostname" >> "$var_cfg"
+    echo "#       ip: $ip" >> "$var_cfg"
+    # new line
+    echo "" >> "$var_cfg"
+    echo "hostname=$hostname" >> "$var_cfg"
+    echo "ip=$ip" >> "$var_cfg"
+    echo "shortname=$shortname" >> "$var_cfg"
+    echo "username=$username" >> "$var_cfg"
+
+    # keep logged data and moved to the fresly created dir
+    mv "$dir/$logfile" "$hostdir/actions.log"
+    logfile="$hostdir/actions.log"
+    echo "logfile='$hostdir/actions.log'" >> "$var_cfg"
 
     # create install.sh to the remote dir
     cat "$INCLUDESDIR/_install.sh" >> "$hostdir/install.sh"

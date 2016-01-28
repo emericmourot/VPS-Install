@@ -54,3 +54,4 @@ function check_parameters() {
 # launch everytime
 should_install
 check_parameters
+_eal "Lauching script $config_app_name"
