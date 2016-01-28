@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 # <START OF CONFIG>
-config.app_name=java
-config.default_install=yes
+config_app_name=java
+config_default_install=yes
 # <END OF CONFIG>
 
-source "ssh-access.sh"
+# required after <START OF CONFIG>/<END OF CONFIG> bloc
+source "var.cfg" 2>&1 /dev/null
 
 #
 # JAVA
@@ -14,7 +15,7 @@ source "ssh-access.sh"
 
 
 # check if java is already installed
-java_version=`$SSHCMD "java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}'"`
+java_version=`$SSHCMD "java -version 2>&1 | grep version | awk '{print $3}' | sed 's/\"//g'"`
 if [ -z "$java_version" ] ; then
 
 # install dialog

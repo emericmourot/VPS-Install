@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
 # <START OF CONFIG>
-config.app_name=upgrade
-config.default_install=yes
+config_app_name=dist-upgrade
+config_default_install=yes
 # <END OF CONFIG>
+
+# required after <START OF CONFIG>/<END OF CONFIG> bloc
+source "var.cfg" 2>&1 /dev/null
 
 # update packages
 _re "apt-get update" "done apt-get update" "apt-get update failed"

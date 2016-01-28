@@ -12,15 +12,25 @@ declare -i True=1
 declare -i False=0
 declare -i debug=0
 program="${0##*/}"
-logfile="${program%.*}.log"
-dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-dirname="${dir##*/}"
 
 # constants
 declare -r SEPARATOR="-----------------------------------------------------------------"
-declare -r INCLUDESDIR="$dir/includes" #$([[ ! -d "${BASH_SOURCE%/*}" ]] && echo "$PWD" || echo "${BASH_SOURCE%/*}") # the dir where this script is running from
-declare -r INSTALL_SCRIPTS_DIR="install.d"
-declare -r INSTALL_CFG="install.cfg"
+declare -r SOC="# <START OF CONFIG>"
+declare -r EOC="# <END OF CONFIG>"
+
+# log with timestamp
+function _log {
+    timestamp=`date +%d/%m/%Y-%H:%M:%S`
+    echo [$timestamp] $1 >> ${logfile}
+}
+
+# output debug to std if debug set, and log to file anyway
+function _d {
+    if [ $debug ] ; then
+        echo "[debug] $1"
+    fi
+    _log "$1"
+}
 
 # echo: echo a pretty message and log
 function _e {
@@ -41,24 +51,10 @@ function _error_exit {
     exit 0
 }
 
-# log with timestamp
-function _log {
-    timestamp=`date +%d/%m/%Y-%H:%M:%S`
-    echo [$timestamp] $1 >> ${logfile}
-}
-
 # echo and log: echo to std output and to log file
 function _eal {
     _log "$1"
     echo "> $1"
-}
-
-# output debug to std if debug set, and log to file anyway
-function _d {
-    if [ $debug ] ; then
-        echo "[debug] $1"
-    fi
-    _log "$1"
 }
 
 # check error: echo first string only if exit status is zero
@@ -110,22 +106,22 @@ function _setlog {
     logfile="$1-$2/vps-init.log"
 }
 
-# read propreties key=value
+# read propreties key=value between tokens
 # @args file key
-# @return an eval of keys, so $key contains the value
-function _readprop() {
+# return to stdout the value found for key
+function _readconfig() {
   file="$1"
-  while IFS="=" read -r key value; do
+  # keep only variables between the two tokens « start of config » and « end of config »
+  awk "/$SOC/{flag=1;next}/$EOC/{flag=0}flag" "$file" | while IFS="=" read -r key value; do
     case "$key" in
       '#'*) ;;
       $2)
-        eval "$key=\"$value\""
+        echo $value
         ;;
       *)
-        # eval all key value pairs
-        #eval "$key=\"$value\""
+        #_d "_reaconfig $key=\"$value\""
     esac
-  done < "$file"
+  done
 }
 
 # read config var from $ifile and copy to $ofile
@@ -134,64 +130,21 @@ function _readprop() {
 function _copyconfig() {
   ifile="$1"
   ofile="$2"
-  while IFS="=" read -r key value; do
+  # keep only variables between the two tokens « start of config » and « end of config »
+  awk "/$SOC/{flag=1;next}/$EOC/{flag=0}flag" "$ifile" | while IFS="=" read -r key value; do
     case "$key" in
       '#'*) ;;
-      'config.'*)
+      'config_app_name'*)
+        echo "config_script=${ifile##*/}" >> $ofile
+        ;;
+      'config_'*)
         echo "$key=\"$value\"" >> $ofile
         ;;
       *)
         # eval all key value pairs
         #eval "$key=\"$value\""
     esac
-  done < "$ifile"
-}
-
-# write config by reading default options in each install.d scripts
-# copy scripts from install.d
-# @args shortname hostname (directory to write the install.cfg file)
-function _wconfig {
-
-    if [ -z "$1" ] || [ -z "$2" ] ; then
-        _error_exit "INTERNAL: hostname or shortname are not set in _wconfig"
-    fi
-
-    mdir="$dir/$1-$2"
-    if [ -f "$mdir/$INSTALL_CFG" ] ; then
-        _error_exit "$mdir already exists!"
-    else
-        mkdir $mdir 2>/dev/null
-    fi
-
-    if [ ! -w "$mdir" ] ; then
-        _error_exit "Cannot write into $mdir"
-    fi
-
-    if [ -f "$mdir/$INSTALL_CFG" ] ; then
-        _error_exit "$mdir/$INSTALL_CFG already exists, cannot overwrite!"
-    fi
-
-    for file in "$INCLUDESDIR/$INSTALL_SCRIPTS_DIR"/*.sh
-    do
-        _d "Processing $file"
-        if [ -f "$file" ] ; then
-            _readprop $file "config.app_name"
-            _readprop $file "config.default_install"
-            if [ -z "$config.app_name" ] || [ -z "$config.default_install" ] ; then
-                _error_exit "config.app_name or config.default_install not declared in $file"
-            fi
-            echo "$config.app_name=[" >> "$mdir/$INSTALL_CFG"
-            _copyconfig $file $mdir/$INSTALL_CFG
-            echo "]" >> "$mdir/$INSTALL_CFG"
-        fi
-    done
-
-    logfile="$mdir/actions.log"
-    echo "#!/usr/bin/env bash" > "$mdir/install.sh"
-    echo '' >> "$mdir/install.sh"
-    echo "logfile='$mdir/actions.log'" >> "$mdir/install.sh"
-    cat "_install.sh" >> "$mdir/install.sh"
-
+  done
 }
 
 # return the absolute path for any relative path
@@ -227,4 +180,8 @@ function _abspath(){
   done
   echo /"${outp[*]}"
 )
+}
+
+function _replaceconfig() {
+  echo ""
 }
