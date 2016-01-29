@@ -14,5 +14,6 @@ _re "apt-get -y update" "done apt-get update" "apt-get update failed"
 # upgrade
 _re "apt-get -y upgrade" "done apt-get upgrade" "apt-get upgrade failed"
 
-# upgrade
-_re "apt-get -y dist-upgrade" "done apt-get dist-upgrade" "apt-get dist-upgradefailed"
+# dist upgrade
+# TODO: failed, blocked in the middle of the dist-upgrade process
+#_re "apt-get -y dist-upgrade" "done apt-get dist-upgrade" "apt-get dist-upgradefailed"
