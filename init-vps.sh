@@ -26,6 +26,7 @@ fi
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 dirname="${dir##*/}"
 declare -r INCLUDESDIR="$dir/includes"
+declare -r USRMINEDIR="$dir/usr-mine-bin"
 declare -r INSTALL_SCRIPTS_DIR="$dir/install.d"
 hostdir=''
 install_cfg=''
@@ -181,6 +182,8 @@ function _wconfig {
     cp $INCLUDESDIR/toolbox.sh $hostdir
     cp $INCLUDESDIR/ssh-connect.sh $hostdir
     chmod u+x $hostdir/*.sh
+    mkdir $hostdir/tools
+    cp $USRMINEDIR/search $hostdir/tools
 
     # add useful functions
     cat "$INCLUDESDIR/_var.cfg.sh" >> "$var_cfg"
