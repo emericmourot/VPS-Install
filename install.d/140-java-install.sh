@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # <START OF CONFIG>
-config_app_name=java
+config_app_name=java-install
 config_default_install=no
 # <END OF CONFIG>
 
