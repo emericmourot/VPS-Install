@@ -2,7 +2,7 @@
 
 # <START OF CONFIG>
 config_app_name=monit-install
-config_default_install=yes
+config_default_install=no
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
