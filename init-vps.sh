@@ -143,7 +143,7 @@ function _wconfig {
     # keep logged data and moved to the fresly created dir
     mv "$dir/$logfile" "$hostdir/actions.log"
     logfile="$hostdir/actions.log"
-    echo "logfile='$hostdir/actions.log'" >> "$var_cfg"
+    echo "logfile='actions.log'" >> "$var_cfg"
 
     # create install.sh to the remote dir
     cat "$INCLUDESDIR/_install.sh" >> "$hostdir/install.sh"
