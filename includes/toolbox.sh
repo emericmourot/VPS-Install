@@ -83,6 +83,17 @@ function _re {
     _ce `echo $?` "$2" "$3" "$result"
 }
 
+# remote execute and catch error if any
+# @args remotecmd app_name
+function _re_app_ins {
+    if [ -z "$SSHCMD" ] ; then
+        _error_exit "SSHCMD not set"
+    fi
+    _d "remote exec: [$SSHCMD $1 2>&1]"
+    result=`$SSHCMD "$1" 2>&1`
+    _ce `echo $?` "$2 installed" "failed to install $2" "$result"
+}
+
 # _re and exit on error
 # @args remotecmd message_ok message_error
 function _re_exit {

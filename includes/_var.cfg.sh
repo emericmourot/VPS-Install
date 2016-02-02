@@ -55,6 +55,7 @@ function check_parameters() {
 # copy file to remote
 # @args folderOrFile2copy absolutefolderdest
 function _copy {
+    _d "will copy [$1] to [$username@$hostname:$2]…"
     result=`scp -r "$1" $username@$hostname:"$2"`
     _ce `echo $?` "$1 copied to $2" "Failed to copy $1 to $2" "$result"
 }
