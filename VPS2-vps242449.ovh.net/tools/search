@@ -1,0 +1,142 @@
+################################################################ 
+#                                                              # 
+#                       S E A R C H                            # 
+#                                                              # 
+# Use the power of find and grep in a single command line tool # 
+# Tools written by Jose Abad in 1999 Open Software Foundation  # 
+# and modified by Emeric 2002, 2006                            # 
+#                                                              # 
+# Usage: search [options] search items ...                     # 
+#   Options:                                                   # 
+#      -q     : quiet mode, only show the file names           # 
+#      -i     : doesn't take into account cases                # 
+#      -f ext : searches onto files with extension ext,        # 
+#               default is all files                           # 
+#      -s     : statistics                                     # 
+#      -d     : debug mode on                                  # 
+#      -h     : this help                                      # 
+#                                                              # 
+################################################################ 
+ 
+ 
+#!/bin/bash 
+ 
+separator="-----------------------------------------------------------------" 
+ 
+typeset i True=1 
+typeset i False=0 
+typeset i quiet=False 
+typeset i debug=False 
+typeset i stat=False 
+typeset i ignoreCase=False 
+typeset s what="" 
+typeset s ext="*" 
+typeset s program="${0##*/}" 
+typeset s the_path=`pwd` 
+typeset s the_path="${the_path##*mourot/}" 
+ 
+while [ "$1" != "" ] ; do 
+ 
+case "$1" in  
+  -h|-help)  
+	echo "Usage: $program [options] search items ..." 
+        echo "  Options:" 
+        echo "      -q     : quiet mode, only show the file names." 
+        echo "      -i     : doesn't take into account cases." 
+        echo "      -f ext : searches onto files with extension ext, default is all files." 
+        echo "      -s     : statistics." 
+        echo "      -d     : debug mode on." 
+        echo "      -h     : this help." 
+        echo "" 
+        exit 0 
+        ;; 
+   
+  -q|-quiet) 
+        quiet=True; 
+        shift          
+        ;; 
+ 
+  -s|-statistics) 
+        stat=True; 
+        shift          
+        ;; 
+ 
+  -d|-debug) 
+        debug=True; 
+        shift          
+        ;; 
+ 
+  -f|-file) 
+        shift 
+        if [ "$1" = "" ] ; then 
+          echo "ERROR: you miss the extension that you are asking for." 
+          exit 0 
+        else 
+          ext=$1 
+        fi 
+	shift         
+        ;; 
+ 
+  -i|-ignore) 
+        ignoreCase=True; 
+        shift          
+        ;; 
+ 
+  *) 
+        if [ "$what" = "" ] ; then 
+            what="$1" 
+        else  
+            what="$what $1"; 
+        fi 
+        shift 
+        ;; 
+esac 
+done 
+ 
+if [ "$what" = "" ] ; then 
+  echo "No arguments, can't do anything. Use $program -help for more info." 
+  exit 0 
+fi 
+ 
+if [ "$debug" = "True" ] ; then 
+  echo "find [what      = $what]   "  
+  echo "     [quiet     = $quiet] " 
+  echo "     [ignoreCase= $ignoreCase] " 
+  echo "     [debug     = $debug] " 
+  echo "     [ext files = $ext]" 
+fi 
+ 
+if [ "$ignoreCase" = "True" ] ; then 
+  ignoreCase="-i" 
+else 
+  ignoreCase="" 
+fi 
+ 
+echo "" 
+echo "From /$the_path search '$what' in *$ext" 
+echo $separator 
+# Statistics 
+if   [ "$stat" = "True" ] ; then 
+ 
+  MATCH=`find . -type f -name "*${ext}" -exec grep -s $ignoreCase "$what" {} \; \ 
+         -print | grep "\./" | wc -l  \ 
+	    2>/dev/null | sed -e 's;^[ 	]*;;' -e 's;[ 	]*$;;'` 
+  echo "Found ${MATCH} files." 
+ 
+# Quiet info 
+elif [ "$quiet" = "True" ] ; then 
+  find . -type f -name "*${ext}" -exec grep -s $ignoreCase "$what" {} \; \ 
+         -print | grep "\./"   \ 
+         2>/dev/null 
+ 
+# The full monty 
+else 
+  find . -type f -name "*${ext}" -exec grep -s $ignoreCase "$what" {} \; \
+         -print \
+         -exec echo $separator \; \
+         2>/dev/null 
+fi 
+ 
+echo "" 
+ 
+exit 0

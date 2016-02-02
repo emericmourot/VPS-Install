@@ -60,7 +60,7 @@ function _eal {
 # check error: echo first string only if exit status is zero
 # args: err message_ok message_error error
 function _ce {
-    #_d "previous cmd returns with exit status $1"
+    #_d "previous cmd return with exit status $1"
     if [ "$1" -ne "0" ] ; then
         if [ -n "$4" ] ; then # if there a non empty third args (string)
             _error "ERROR: check process [$2] with error $4"
