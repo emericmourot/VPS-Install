@@ -60,7 +60,7 @@ function _eal {
 # check error: echo first string only if exit status is zero
 # args: err message_ok message_error error
 function _ce {
-    #_d "previous cmd return with exit status $1"
+    #_d "previous cmd returns with exit status $1"
     if [ "$1" -ne "0" ] ; then
         if [ -n "$4" ] ; then # if there a non empty third args (string)
             _error "ERROR: check process [$2] with error $4"
@@ -81,6 +81,17 @@ function _re {
     _d "remote exec: [$SSHCMD $1 2>&1]"
     result=`$SSHCMD "$1" 2>&1`
     _ce `echo $?` "$2" "$3" "$result"
+}
+
+# remote execute and catch error if any
+# @args remotecmd app_name
+function _re_app_ins {
+    if [ -z "$SSHCMD" ] ; then
+        _error_exit "SSHCMD not set"
+    fi
+    _d "remote exec: [$SSHCMD $1 2>&1]"
+    result=`$SSHCMD "$1" 2>&1`
+    _ce `echo $?` "$2 installed" "failed to install $2" "$result"
 }
 
 # _re and exit on error
