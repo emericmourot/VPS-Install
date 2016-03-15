@@ -41,3 +41,4 @@ if [ "$config_copysshkeytoremote_done" != "yes" ] ; then
     echo "" >> var.cfg
     echo "config_copysshkeytoremote_done=yes" >> var.cfg
 fi
+

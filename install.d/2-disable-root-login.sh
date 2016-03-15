@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 # <START OF CONFIG>
-config_app_name=ssh-init
+config_app_name=disable-root-login
 config_default_install=yes
-config_copysshkeytoremote=yes
-config_sshkeyfile="~/.ssh/id_rsa.pub"
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
 source "var.cfg" 2>&1 /dev/null
+
+# based on #7 of http://www.cyberciti.biz/tips/linux-security.html
+
 
 # copy public key to remote for current user
 if [ "$config_copysshkeytoremote" = "yes" ] ; then
@@ -42,4 +43,3 @@ if [ "$config_copysshkeytoremote_done" != "yes" ] ; then
     echo "config_copysshkeytoremote_done=yes" >> var.cfg
 fi
 
-# ssh-keygen -t rsa -b 4096 -C "emeric.mourot@terden.com" -f ~/.ssh/id_rsa -P ''
