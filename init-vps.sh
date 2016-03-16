@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-################################################################
-#                                                              #
-#                       Init VPS SSH                           #
-#                                                              #
-# Usage: vps-init [options] shortname hostname username        #
-#   Options:                                                   #
-#      -d      : debug mode on                                 #
-#      -h      : this help                                     #
-#      -p      : set ssh port (default 22) for creating access #
-#      -nojava : do not install java                           #
-#      -debian : default is ubuntu                             #
-#                                                              #
-################################################################
+#################################################################
+#                                                               #
+#                       Init VPS SSH                            #
+#                                                               #
+# Usage: vps-init [options] shortname hostname username         #
+#   Options:                                                    #
+#      -d      : debug mode on                                  #
+#      -h      : this help                                      #
+#      -p      : set ssh port (default 22) for creating access  #
+#      -nojava : do not install java                            #
+#      -debian : default is ubuntu                              #
+#                                                               #
+#################################################################
 
 # boostrap by importing toolbox, then could use functions
 # first check if includes/toolbox.sh is present
@@ -30,13 +30,15 @@ declare -r USRMINEDIR="$dir/usr-mine-bin"
 declare -r INSTALL_SCRIPTS_DIR="$dir/install.d"
 hostdir=''
 install_cfg=''
+config_sshkeyfile="~/.ssh/id_rsa.pub"
 
 # parse args from command line
 while [ "$1" != "" ] ; do
 
     case "$1" in
         -h|-help)
-	        echo "Usage: $program [options] shortname hostname username"
+	        #echo "Usage: $program [options] shortname hostname username sshport"
+            echo "Usage: $program [options] shortname hostname username"
             echo "  Options:"
             echo "      -d     : debug mode on."
             echo "      -h     : this help."
@@ -55,6 +57,8 @@ while [ "$1" != "" ] ; do
                hostname="$1"
             elif [ "$username" = "" ] ; then
                 username="$1"
+            #elif [ "$sshport" = "" ] ; then
+            #    sshport="$1"
             else
                 # drop
                 extra="$extra $1";
@@ -65,6 +69,7 @@ while [ "$1" != "" ] ; do
 
 done
 
+#if [ "$shortname" = "" ]  || [ "$hostname" = "" ]  || [ "$username" = "" ] || [ "$sshport" = "" ]; then
 if [ "$shortname" = "" ]  || [ "$hostname" = "" ]  || [ "$username" = "" ] ; then
     _error_exit "Missing arguments, can't do anything. Use $program -help for more info."
 fi
@@ -72,12 +77,12 @@ fi
 # debug parameters
 _d "[hotsname     = $hostname]"
 _d "[username     = $username]"
+#_d "[sshport      = $sshport]"
 _d "[dir          = $dir]"
 _d "[dirname      = $dirname]"
 _d "[log file     = $logfile] "
 _d "[includes dir = $INCLUDESDIR] "
 _d "[scripts dir  = $INSTALL_SCRIPTS_DIR] "
-
 
 
 # write config by reading default options in each install.d scripts
@@ -88,6 +93,12 @@ function _wconfig {
     if [ -z "$shortname" ] || [ -z "$hostname" ] ; then
         _error_exit "INTERNAL: hostname or shortname are not set in _wconfig"
     fi
+
+    # Create new user, change ssh port, end root ssh connexion
+    # exit if connexion cannot be done
+    source includes/init-ssh.sh
+
+    #### END OF SSH CONNEXION AS ROOT ####
 
     # create a new dir for this hostname
     hostdir="$dir/$shortname-$hostname"
@@ -114,11 +125,6 @@ function _wconfig {
     # new line
     echo "" >> "$var_cfg"
 
-    # if SSHCMD has not already being set
-    if [ -z "$SSHCMD" ] ; then
-        SSHCMD="ssh ${username}@${hostname}"
-        _d "[ssh cmd   = $SSHCMD]"
-    fi
     echo "SSHCMD=\"$SSHCMD\"" >> "$var_cfg"
 
     # new line
@@ -207,5 +213,8 @@ _eal "   5. Read log from $logfile"
 _eal "      less $logfile"
 _eal "   6. Start a ssh connexion with $hostname simply"
 _eal "      ./ssh-connect.sh"
+_eal ""
+_eal "   Root password changed, please keep this new one in safe place: $rootpassword"
+_eal "   A user [$username] (sudoer) has been added with password: $userpassword"
 _eal ""
 _eal "*****************************************************************************************************"

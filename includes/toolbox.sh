@@ -79,7 +79,7 @@ function _re {
         _error_exit "SSHCMD not set"
     fi
     _d "remote exec: [$SSHCMD $1 2>&1]"
-    result=`$SSHCMD "$1" 2>&1`
+    result=$($SSHCMD "$1" 2>&1)
     _ce `echo $?` "$2" "$3" "$result"
 }
 
@@ -90,7 +90,7 @@ function _re_app_ins {
         _error_exit "SSHCMD not set"
     fi
     _d "remote exec: [$SSHCMD $1 2>&1]"
-    result=`$SSHCMD "$1" 2>&1`
+    result=$($SSHCMD "$1" 2>&1)
     _ce `echo $?` "$2 installed" "failed to install $2" "$result"
 }
 
@@ -100,13 +100,13 @@ function _re_exit {
     if [ -z "$SSHCMD" ] ; then
         _error_exit "SSHCMD not set"
     fi
-    _d "remote exec & exit: [$SSHCMD $1 2>&1]"
-    result=`$SSHCMD "$1" 2>&1`
+    _d "remote exec & exit: [$SSHCMD $1 3>&1 2>&1]"
+    result=$($SSHCMD "$1" 3>&1 2>&1)
     errno=`echo $?`
     _ce $errno "$2" "$3" "$result"
     if [ "$errno" -ne "0" ] ; then
         exit 0
-     fi
+    fi
 }
 
 # import other scripts, should declare path relative to script that called toolbox.sh
