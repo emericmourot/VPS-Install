@@ -25,12 +25,12 @@ _re_exit "uname -a" "SSH connexion ok for root" "SSH connexion failed for root"
 #rootpassword=$($SSHCMD "apg -a 1 -m 14 -x 14 -n 1 -q -M NCL")
 _re "apt-get install -y pwgen" "pwgen password generator installed" "pwgen password generator installation failed"
 rootpassword=$($SSHCMD "pwgen -c -B 16 1")
-echo "new root password: $rootpassword"
+_d "new root password: $rootpassword"
 
 # Added a new user (username)
 #userpassword=$($SSHCMD "apg -a 1 -m 14 -x 14 -n 1 -q -M NCL")
 userpassword=$($SSHCMD "pwgen -c -B 16 1")
-echo "user password: $userpassword"
+_d "user password: $userpassword"
 _re_exit "useradd --password ${userpassword} --home /home/${username} --create-home --gid users --groups users ${username}" "user [${username}] added" "failed to add user [${username}]"
 _re "adduser ${username} sudo" "sudo power for ${username}" "failed to add ${username} to sudoers"
 
@@ -49,6 +49,7 @@ fi
 # copy local ssh key to grant access without password if not already copied
 sshkey=`cat $sshkeyfile`
 _re "mkdir /home/${username}/.ssh 2> /dev/null; echo ${sshkey} >> /home/${username}/.ssh/authorized_keys" "$sshkeyfile copied to ${hostname} for ${username}" "copy of key $sshkeyfile failed for ${username}"
+_re "mkdir /root/.ssh 2> /dev/null; echo ${sshkey} >> /root/.ssh/authorized_keys" "$sshkeyfile copied to ${hostname} for root" "copy of key $sshkeyfile failed for root"
 
 # Finally forbidden root login with ssh
 #_re "sed 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config > /etc/ssh/sshd_config" "SSH root login forbidden" "Failed to forbid ssh root login"
@@ -66,3 +67,10 @@ _d "[ssh cmd   = $SSHCMD]"
 
 # check connexion
 _re_exit "uname -a" "SSH connexion configured for ${username}@${hostname}" "SSH connexion failed for ${username}@${hostname}"
+
+#### Switch to root for the installation process ####
+SSHCMD="ssh root@${hostname}"
+_d "[ssh cmd   = $SSHCMD]"
+
+# check connexion
+_re_exit "uname -a" "SSH connexion configured for root@${hostname}" "SSH connexion failed for root@${hostname}"

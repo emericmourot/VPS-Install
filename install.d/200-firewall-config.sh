@@ -8,10 +8,26 @@ config_default_install=yes
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
 source "var.cfg" 2>&1 /dev/null
 
-# install dialog
-_re "apt-get install -y monit" "monit installed" "monit installation failed"
+# https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
+# http://www.alsacreations.com/tuto/lire/622-Securite-firewall-iptables.html
+# http://www.thegeekstuff.com/2011/06/iptables-rules-examples/
 
-# iptables -I INPUT -p tcp --dport 1022 -j ACCEPT
+# get the rules from https://gist.github.com/thomasfr/9712418
+
+
+# install
+#_re "apt-get install -y iptables-persistent" "iptables-persistent installed" "iptables-persistent installation failed"
+
+_copy "200-firewall-config/firewall" "/etc/init.d/firewall"
+$SSHCMD "chmod +x /etc/init.d/firewall"
+
+# Activate rules
+$SSHCMD "/etc/init.d/firewall"
+
+# When rules are ok, uncomment the following line, remove it with update-rc.d -f firewall remove
+#$SSHCMD "update-rc.d firewall defaults"
+
+#_re "invoke-rc.d iptables-persistent save" "iptables rules saved" "iptables rules save FAILED"
 
 # List The Open Ports And The Process That Owns Them
 #sudo lsof -i

@@ -96,7 +96,9 @@ function _wconfig {
 
     # Create new user, change ssh port, end root ssh connexion
     # exit if connexion cannot be done
-    source includes/init-ssh.sh
+    #source includes/init-ssh.sh
+    SSHCMD="ssh root@${hostname}"
+    _d "[ssh cmd   = $SSHCMD]"
 
     #### END OF SSH CONNEXION AS ROOT ####
 

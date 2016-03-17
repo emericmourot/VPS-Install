@@ -15,9 +15,9 @@ _re "apt-get install -y mongodb" "MongoDB installed" "MongoDB installation faile
 # https://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
 $SSHCMD "mkdir /var/mongodb-data"
 
-
 # configuration file /etc/mongod.conf
 # https://docs.mongodb.org/manual/reference/configuration-options/
+_copy "124-mongodb-install/mongod.conf" "/etc/mongod.conf"
 
 # start the server
-$SSHCMD "service mongodb start"
+$SSHCMD "service mongodb restart"

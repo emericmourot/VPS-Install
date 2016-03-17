@@ -9,6 +9,7 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # install ruby
-_re "apt-get install -y ruby jekyll" "Ruby/Jekyll installed" "Ruby/Jekyll installation failed"
-#_re "gem install jekyll" "Jekyll installed" "Jekyll installation failed"
+_re "apt-get install -y curl git-core build-essential zlib1g-dev libssl-dev libreadline6-dev gem libyaml-dev ruby ruby-dev" "Ruby installed" "Ruby installation failed"
+_re "gem install rubygems-update; update_rubygems; gem update --system" "Rubygems updated" "Rubygems update failed"
+_re "gem install jekyll" "Jekyll installed" "Jekyll installation failed"
 _re "gem update jekyll" "Jekyll updated" "Jekyll update failed"
