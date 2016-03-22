@@ -10,6 +10,10 @@ config_target=production
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
 source "var.cfg" 2>&1 /dev/null
 
+# Switch to user
+SSHCMD="ssh ${username}@${hostname}"
+_d "[ssh cmd   = $SSHCMD]"
+
 # get lpe-web sources
 _re "cd ~/; git clone https://EmericMourot:${config_git_password}@bitbucket.org/EmericMourot/lpe-web.git lpe-web" "sources cloned successfully" "sources clone failed"
 

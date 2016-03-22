@@ -9,4 +9,4 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # install dialog
-_re "apt-get install -y fail2ban" "monit installed" "monit installation failed"
+_re "apt-get install -y fail2ban" "fail2ban installed" "fail2ban installation failed"

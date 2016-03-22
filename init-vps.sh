@@ -94,13 +94,9 @@ function _wconfig {
         _error_exit "INTERNAL: hostname or shortname are not set in _wconfig"
     fi
 
-    # Create new user, change ssh port, end root ssh connexion
+    # Create new user, send key for new user & root
     # exit if connexion cannot be done
-    #source includes/init-ssh.sh
-    SSHCMD="ssh root@${hostname}"
-    _d "[ssh cmd   = $SSHCMD]"
-
-    #### END OF SSH CONNEXION AS ROOT ####
+    source includes/init-ssh.sh
 
     # create a new dir for this hostname
     hostdir="$dir/$shortname-$hostname"
@@ -216,7 +212,7 @@ _eal "      less $logfile"
 _eal "   6. Start a ssh connexion with $hostname simply"
 _eal "      ./ssh-connect.sh"
 _eal ""
-_eal "   Root password changed, please keep this new one in safe place: $rootpassword"
+_eal "   Root password SHOULD be changed with this new password: $rootpassword"
 _eal "   A user [$username] (sudoer) has been added with password: $userpassword"
 _eal ""
 _eal "*****************************************************************************************************"
