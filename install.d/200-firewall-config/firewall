@@ -1,6 +1,8 @@
 #!/bin/bash
 IPT="/sbin/iptables"
 
+# git config --global url. "https://".insteadOf "git://"
+
 # Server IP
 SERVER_IP="$(ip addr show eth0 | grep 'inet ' | cut -f2 | awk '{ print $2}')"
 
@@ -8,7 +10,8 @@ SERVER_IP="$(ip addr show eth0 | grep 'inet ' | cut -f2 | awk '{ print $2}')"
 DNS_SERVER="213.186.33.99"
 
 # Allow connections to this package servers
-PACKAGE_SERVER="registry.npmjs.org ikt.pm2.io bitbucket.org"
+PACKAGE_SERVER="bower.herokuapp.com registry.npmjs.org rpm.nodesource.com ikt.pm2.io github.com bitbucket.org nova.clouds.archive.ubuntu.com security.ubuntu.com"
+GITHUB_SERVER="192.30.252.128 192.30.252.129 192.30.252.130 192.30.252.131"
 
 echo "flush iptable rules"
 $IPT -F
@@ -53,6 +56,12 @@ do
 	$IPT -A INPUT  -p tcp -s "$ip" --sport 443 -m state --state ESTABLISHED     -j ACCEPT
 done
 
+for ip in $GITHUB_SERVER
+do
+        echo "Allow connection to '$ip' on port 9418"
+        $IPT -A OUTPUT -p tcp -d "$ip" --dport 9418 -m state --state NEW,ESTABLISHED -j ACCEPT
+        $IPT -A INPUT  -p tcp -s "$ip" --sport 9418 -m state --state ESTABLISHED     -j ACCEPT
+done
 
 #######################################################################################################
 ## Global iptable rules. Not IP specific
