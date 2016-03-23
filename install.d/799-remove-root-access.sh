@@ -20,6 +20,11 @@ _d "new root password: $rootpassword"
 # https://www.adayinthelifeof.nl/2012/03/12/why-putting-ssh-on-another-port-than-22-is-bad-idea/
 #_re "sed 's/Port 22/Port ${sshport}/g' /etc/ssh/sshd_config > /etc/ssh/sshd_config && service ssh restart" "SSH port changed to ${sshport}" "Failed to change ssh port to ${sshport}"
 
+tmpfile=/tmp/fs$$
+# sed -e "s/root@${hostname}/${username}@${hostname}/g" var.cfg > ${tmpfile}
+mv ${tmpfile} var.cfg
+rm -f ${tmpfile}
+
 #### END OF SSH CONNEXION AS ROOT ####
 
 # Now set ssh connexion with new user and new port
