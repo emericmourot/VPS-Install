@@ -15,27 +15,31 @@ SSHCMD="ssh ${username}@${hostname}"
 _d "[ssh cmd   = $SSHCMD]"
 
 # get lpe-web sources
-_re "cd ~/; git clone https://EmericMourot:${config_git_password}@bitbucket.org/EmericMourot/lpe-web.git lpe-web" "sources cloned successfully" "sources clone failed"
+#_re "cd ~/; git clone https://EmericMourot:${config_git_password}@bitbucket.org/EmericMourot/lpe-web.git lpe-web" "sources cloned successfully" "sources clone failed"
 
 # npm install
-_re "cd ~/lpe-web; npm install" "NPM packages installed" "NPM packages installation failed"
+#_re "cd ~/lpe-web; npm install" "NPM packages installed" "NPM packages installation failed"
 
 # bower install
-_re "cd ~/lpe-web; bower install  --allow-root" "Bower packages installed" "Bower packages installation failed"
+#_re "cd ~/lpe-web; bower install  --allow-root" "Bower packages installed" "Bower packages installation failed"
 
 # gulp for building all sources and generating all images
-_re "cd ~/lpe-web && gulp info && gulp generate --${config_target}" "site generated in dist folder" "failed to generate dist"
+#_re "cd ~/lpe-web && gulp info && gulp generate --${config_target}" "site generated in dist folder" "failed to generate dist"
 
 # server side
-$SSHCMD "cd ~/lpe-web; cp -r rest-api-server /var/"
+#$SSHCMD "cd ~/lpe-web; cp -r rest-api-server /var/"
 
 # npm install (server side)
-_re "cd /var/rest-api-server/; npm install" "NPM packages installed for REST API server" "NPM packages installation failed for REST API server"
+#_re "cd /var/rest-api-server/; npm install" "NPM packages installed for REST API server" "NPM packages installation failed for REST API server"
 
 # start server
 # pm2 start server.js -- --stage
 
-
 # ln -s /etc/nginx/sites-available/stage.lespetitsentrepreneurs.com /etc/nginx/sites-enabled/
 #sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
 # sudo service nginx restart
+
+_re "mkdir -p /var/rest-api-server/${config_target}" "/var/rest-api-server/${config_target} created" "/var/rest-api-server/${config_target} creation failed"
+$SSHCMD "cd ~/ && rest-api-server && mkdir && ln -s /var/rest-api-server/${config_target} rest-api-server/"
+
+

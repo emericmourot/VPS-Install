@@ -31,7 +31,7 @@ fi
 server_name=$(_escape "${config_nginx_server_name}")
 root=$(_escape "${config_nginx_root}")
 
-sed -e 's/TOKChV4-Full-Server-Name/${full_server_name}/g' -e 's/TOKChV4-Server-Name/${serveur_name}/g' -e 's/TOKChV4-Root/${root}/g' 121-nginx-conf-lpe/nginx.conf > ${tmpfile}
+sed -e "s/TOKChV4-Full-Server-Name/${full_server_name}/g" -e "s/TOKChV4-Server-Name/${serveur_name}/g" -e "s/TOKChV4-Root/${root}/g" 121-nginx-conf-lpe/nginx.conf > ${tmpfile}
 
 _copy2root "${tmpfile}" "/etc/nginx/sites-available/${config_nginx_server_name}"
 _re "ln -s /etc/nginx/sites-available/${config_nginx_server_name} /etc/nginx/sites-enabled/" "Nginx config deployed" "Nginx config deployement failure"

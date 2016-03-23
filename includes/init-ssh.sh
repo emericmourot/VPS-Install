@@ -5,7 +5,10 @@
 #                                                               #
 #################################################################
 
+rm -f ~/.ssh/known_hosts 2>&1 > /dev/null
+
 # First ssh connexion as root
+#SSHCMD="ssh -o StrictHostKeyChecking=no root@${hostname}"
 SSHCMD="ssh root@${hostname}"
 _d "[ssh cmd   = $SSHCMD]"
 
