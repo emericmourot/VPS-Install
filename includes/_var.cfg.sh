@@ -59,6 +59,11 @@ function _copy {
     result=`scp -r "$1" $username@$hostname:"$2"`
     _ce `echo $?` "$1 copied to $2" "Failed to copy $1 to $2" "$result"
 }
+function _copy2root {
+    _d "will copy [$1] to [root@$hostname:$2]…"
+    result=`scp -r "$1" root@$hostname:"$2"`
+    _ce `echo $?` "$1 copied to $2" "Failed to copy $1 to $2" "$result"
+}
 
 # launch everytime
 should_install

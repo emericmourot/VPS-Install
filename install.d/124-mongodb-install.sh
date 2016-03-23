@@ -17,7 +17,7 @@ $SSHCMD "mkdir /var/mongodb-data"
 
 # configuration file /etc/mongod.conf
 # https://docs.mongodb.org/manual/reference/configuration-options/
-_copy "124-mongodb-install/mongod.conf" "/etc/mongod.conf"
+_copy2root "124-mongodb-install/mongod.conf" "/etc/mongod.conf"
 
 # start the server
 $SSHCMD "service mongodb restart"

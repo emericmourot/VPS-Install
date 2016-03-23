@@ -18,7 +18,7 @@ source "var.cfg" 2>&1 /dev/null
 # install
 #_re "apt-get install -y iptables-persistent" "iptables-persistent installed" "iptables-persistent installation failed"
 
-_copy "200-firewall-config/firewall" "/etc/init.d/firewall"
+_copy2root "200-firewall-config/firewall" "/etc/init.d/firewall"
 $SSHCMD "chmod +x /etc/init.d/firewall"
 
 # Activate rules
