@@ -24,7 +24,7 @@ _re "cd ~/lpe-web; npm install" "NPM packages installed" "NPM packages installat
 _re "cd ~/lpe-web; bower install  --allow-root" "Bower packages installed" "Bower packages installation failed"
 
 # gulp for building all sources and generating all images
-_re "cd ~/lpe-web; gulp generate --${config_target}" "site generated in dist folder" "failed to generate dist"
+_re "cd ~/lpe-web && gulp info && gulp generate --${config_target}" "site generated in dist folder" "failed to generate dist"
 
 # server side
 $SSHCMD "cd ~/lpe-web; cp -r rest-api-server /var/"
