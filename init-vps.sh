@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-#################################################################
-#                                                               #
-#                       Init VPS SSH                            #
-#                                                               #
-# Usage: vps-init [options] shortname hostname username         #
-#   Options:                                                    #
-#      -d      : debug mode on                                  #
-#      -h      : this help                                      #
-#      -p      : set ssh port (default 22) for creating access  #
-#      -nojava : do not install java                            #
-#      -debian : default is ubuntu                              #
-#                                                               #
-#################################################################
+##################################################################
+#                                                                #
+#                       Init VPS SSH                             #
+#                                                                #
+# Usage: vps-init [options] shortname hostname username [target] #
+#   Options:                                                     #
+#      -d      : debug mode on                                   #
+#      -h      : this help                                       #
+#      -p      : set ssh port (default 22) for creating access   #
+#      -nojava : do not install java                             #
+#      -debian : default is ubuntu                               #
+#                                                                #
+##################################################################
 
 # boostrap by importing toolbox, then could use functions
 # first check if includes/toolbox.sh is present
@@ -29,6 +29,7 @@ declare -r INCLUDESDIR="$dir/includes"
 declare -r USRMINEDIR="$dir/usr-mine-bin"
 declare -r INSTALL_SCRIPTS_DIR="$dir/install.d"
 hostdir=''
+target='production'
 install_cfg=''
 config_sshkeyfile="~/.ssh/id_rsa.pub"
 
@@ -57,8 +58,8 @@ while [ "$1" != "" ] ; do
                hostname="$1"
             elif [ "$username" = "" ] ; then
                 username="$1"
-            #elif [ "$sshport" = "" ] ; then
-            #    sshport="$1"
+            elif [ "$target" = "" ] ; then
+                target="$1"
             else
                 # drop
                 extra="$extra $1";
@@ -77,13 +78,12 @@ fi
 # debug parameters
 _d "[hotsname     = $hostname]"
 _d "[username     = $username]"
-#_d "[sshport      = $sshport]"
+_d "[target       = $target]"
 _d "[dir          = $dir]"
 _d "[dirname      = $dirname]"
 _d "[log file     = $logfile] "
 _d "[includes dir = $INCLUDESDIR] "
 _d "[scripts dir  = $INSTALL_SCRIPTS_DIR] "
-
 
 # write config by reading default options in each install.d scripts
 # copy scripts from install.d
@@ -128,7 +128,6 @@ function _wconfig {
     # new line
     echo "" >> "$var_cfg"
 
-    echo "# hostname details" >> "$var_cfg"
     # write info about the host
     ip=$(dig $hostname +short)
     #mem=$($SSHCMD "awk '/^MemTotal:/{print $2}' /proc/meminfo")
@@ -138,12 +137,14 @@ function _wconfig {
 
     echo "# hostname: $hostname" >> "$var_cfg"
     echo "#       ip: $ip" >> "$var_cfg"
+    echo "#   target: $target" >> "$var_cfg"
     # new line
     echo "" >> "$var_cfg"
     echo "hostname=$hostname" >> "$var_cfg"
     echo "ip=$ip" >> "$var_cfg"
     echo "shortname=$shortname" >> "$var_cfg"
     echo "username=$username" >> "$var_cfg"
+    echo "target=$target" >> "$var_cfg"
 
     # keep logged data and moved to the fresly created dir
     mv "$dir/$logfile" "$hostdir/actions.log"
@@ -178,6 +179,9 @@ function _wconfig {
             # copy all scripts into this new dir
             cp $file $hostdir
             chmod u+x ${file}
+	    if [ -d "${file/.sh//}" ]; then
+              cp -r "${file/.sh/}" $hostdir
+	    fi
             echo "${file}" >> "$hostdir/install.sh"
         fi
     done
