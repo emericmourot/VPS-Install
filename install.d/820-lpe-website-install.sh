@@ -4,15 +4,14 @@
 config_app_name=lpe-website-install
 config_default_install=yes
 config_git_password=4BG29cbk7ZDk
-config_target=production
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
 source "var.cfg" 2>&1 /dev/null
 
 # Switch to user
-SSHCMD="ssh ${username}@${hostname}"
-_d "[ssh cmd   = $SSHCMD]"
+#SSHCMD="ssh ${username}@${hostname}"
+#_d "[ssh cmd   = $SSHCMD]"
 
 # get lpe-web sources
 #_re "cd ~/; git clone https://EmericMourot:${config_git_password}@bitbucket.org/EmericMourot/lpe-web.git lpe-web" "sources cloned successfully" "sources clone failed"
@@ -39,7 +38,8 @@ _d "[ssh cmd   = $SSHCMD]"
 #sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
 # sudo service nginx restart
 
-_re "mkdir -p /var/rest-api-server/${config_target}" "/var/rest-api-server/${config_target} created" "/var/rest-api-server/${config_target} creation failed"
-$SSHCMD "cd ~/ && rest-api-server && mkdir && ln -s /var/rest-api-server/${config_target} rest-api-server/"
+_re "mkdir -p /var/rest-api-server/${config_nginx_domain_name}/${target}" "/var/rest-api-server/${target} created" "/var/rest-api-server/${target} creation failed"
+_re "mkdir -p /tmp/${config_nginx_domain_name}/rest-api-server/${target}" "Dir for rsync server deploy created [/tmp/${config_nginx_domain_name}/rest-api-server/${target}]" "Could not create /tmp/${config_nginx_domain_name}/rest-api-server/${target}"
+$SSHCMD "cd ~/ && ln -s /var/rest-api-server/${target} rest-api-server/"
 
 

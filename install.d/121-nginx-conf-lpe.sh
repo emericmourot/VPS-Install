@@ -39,4 +39,8 @@ rm -f ${tmpfile}
 
 _re "mkdir -p ${config_nginx_root}" "${config_nginx_root} created" "${config_nginx_root} creation failed"
 
+if [ "${target}" == "production" ]; then
+    _re "mkdir -p /tmp/${config_nginx_domain_name}/www/${target}" "Dir for rsync deploy created [/tmp/${config_nginx_domain_name}/www/${target}]" "Could not create /tmp/${config_nginx_domain_name}/www/${target}"
+fi
+
 $SSHCMD "service nginx restart"
