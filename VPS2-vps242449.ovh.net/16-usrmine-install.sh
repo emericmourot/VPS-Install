@@ -16,5 +16,5 @@ $SSHCMD  "mkdir -p /usr/mine/bin"
 $SSHCMD "echo '#!/bin/sh' > /etc/profile.d/usrmine.sh ; echo 'export PATH=\$PATH:/usr/mine/bin' >> /etc/profile.d/usrmine.sh"
 
 # copy tools
-_copy "tools/search" "/usr/mine/bin"
+_copy2root "tools/search" "/usr/mine/bin"
 $SSHCMD "chmod u+x /usr/mine/bin/*"

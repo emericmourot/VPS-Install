@@ -10,11 +10,15 @@ source "var.cfg" 2>&1 /dev/null
 
 # https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
 # http://www.alsacreations.com/tuto/lire/622-Securite-firewall-iptables.html
+# http://www.thegeekstuff.com/2011/06/iptables-rules-examples/
+
+# get the rules from https://gist.github.com/thomasfr/9712418
+
 
 # install
 #_re "apt-get install -y iptables-persistent" "iptables-persistent installed" "iptables-persistent installation failed"
 
-_copy "200-firewall-config/firewall" "/etc/init.d/firewall"
+_copy2root "200-firewall-config/firewall" "/etc/init.d/firewall"
 $SSHCMD "chmod +x /etc/init.d/firewall"
 
 # Activate rules
