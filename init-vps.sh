@@ -76,7 +76,7 @@ if [ "$shortname" = "" ]  || [ "$hostname" = "" ]  || [ "$username" = "" ] ; the
 fi
 
 # debug parameters
-_d "[hotsname     = $hostname]"
+_d "[hostname     = $hostname]"
 _d "[username     = $username]"
 _d "[target       = $target]"
 _d "[dir          = $dir]"
