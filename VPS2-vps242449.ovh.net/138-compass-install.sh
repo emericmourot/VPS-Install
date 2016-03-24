@@ -9,5 +9,5 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # install compass
-_re "gem install compass" "Compass installed" "Compass installation failed"
-
+#_re "gem install compass" "Compass installed" "Compass installation failed"
+_re "apt-get install -y ruby-compass"

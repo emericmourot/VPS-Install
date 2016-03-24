@@ -14,6 +14,8 @@ source "var.cfg" 2>&1 /dev/null
 
 # get the rules from https://gist.github.com/thomasfr/9712418
 
+# http://unix.stackexchange.com/questions/104954/how-to-allow-outgoing-smtp-on-iptables-debian-linux
+# A much better idea would be to remove all the -A INPUT ... --sport rules and use just this single rule instead
 
 # install
 #_re "apt-get install -y iptables-persistent" "iptables-persistent installed" "iptables-persistent installation failed"

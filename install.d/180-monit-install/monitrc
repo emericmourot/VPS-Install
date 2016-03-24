@@ -1,0 +1,84 @@
+set daemon  60
+with start delay 60
+set logfile syslog facility log_daemon
+set idfile /var/lib/monit/id
+
+set httpd port 2812 and
+  use address localhost
+  allow localhost
+  allow emeric:l0a2O72vIzwG
+#  allow @monit # allow users of group 'monit' to connect (rw)
+#  allow @users readonly
+
+## By default Monit will drop alert events if no mail servers are available.
+## If you want to keep the alerts for later delivery retry, you can use the
+## EVENTQUEUE statement. The base directory where undelivered alerts will be
+## stored is specified by the BASEDIR option. You can limit the maximal queue
+## size using the SLOTS option (if omitted, the queue is limited by space
+## available in the back end filesystem).
+set eventqueue
+  basedir /var/lib/monit/events # set the base directory where events will be stored
+  slots 100                     # optionally limit the queue size
+
+set mailserver mail.gandi.net port 587 username "dev@lespetitsentrepreneurs.com" password "LW6STCMhDiwLfEpN"
+set mail-format {
+  from: monit@lespetitsentrepreneurs.com
+  subject: [Monit] $HOST - $SERVICE $EVENT
+  message: Monit $ACTION $SERVICE at $DATE on $HOST: $DESCRIPTION.
+}
+set alert emeric@lespetitsentrepreneurs.com with reminder on 10 cycles
+
+check system VPS4
+  if loadavg (5min) > 3 then alert
+  if loadavg (15min) > 1 then alert
+  if memory usage > 80% for 4 cycles then alert
+  if swap usage > 20% for 4 cycles then alert
+  if cpu usage (user) > 80% for 2 cycles then alert
+  if cpu usage (system) > 20% for 2 cycles then alert
+  if cpu usage (wait) > 80% for 2 cycles then alert
+#  if cpu usage > 200% for 4 cycles then alert
+
+# Disk (get volume with df -h)
+check device vda1 with path /dev/vda1
+  if space usage > 80% then alert
+  group system
+
+# syslog
+#check process syslogd with pidfile /var/run/syslogd.pid
+#  start program = "/etc/init.d/sysklogd start"
+#  stop program = "/etc/init.d/sysklogd stop"
+
+#check file syslogd_file with path /var/log/syslog
+#  if timestamp > 65 minutes then alert
+
+# SSH
+check process sshd with pidfile /var/run/sshd.pid
+  group ssh
+  start program "/etc/init.d/ssh start"
+  stop program "/etc/init.d/ssh stop"
+  if failed port 22 protocol ssh then restart
+  if 5 restarts within 5 cycles then timeout
+
+# nginx
+check process nginx with pidfile  /var/run/nginx.pid
+  start program = "/etc/init.d/nginx start"
+  stop  program = "/etc/init.d/nginx stop"
+  group www-data
+  if failed host 127.0.0.1 port 80 then restart
+  if 3 restarts within 3 cycles then alert
+  if 10 restarts within 10 cycles then timeout
+
+# mongod
+check process mongodb with pidfile /var/lib/mongodb/mongod.lock
+  start program = "/etc/init.d/mongodb start"
+  stop program = "/etc/init.d/mongodb stop"
+  if failed host 127.0.0.1 port 27017 then restart
+  if 3 restarts within 3 cycles then alert
+  if 5 restart within 5 cycles then timeout
+
+# node
+# http://dev.iachieved.it/iachievedit/using-monit-with-node-js-and-pm2/
+
+# application
+#check file application.log with path /var/log/myapp/application.log
+#  if match "ERROR" then alert

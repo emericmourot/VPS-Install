@@ -9,5 +9,5 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # set date/time
-_re "apt-get install ntpdate" "ntpdate installed" "failed to install ntpdate"
+_re "apt-get install -y ntpdate" "ntpdate installed" "failed to install ntpdate"
 _re "ntpdate fr.pool.ntp.org" "Server time set with ntpdate" "Failed to set date/time"

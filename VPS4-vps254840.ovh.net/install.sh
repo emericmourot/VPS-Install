@@ -22,7 +22,8 @@
 /Users/emeric/Dev/VPS-Install/install.d/160-java-install.sh
 /Users/emeric/Dev/VPS-Install/install.d/164-php5.5+-install.sh
 /Users/emeric/Dev/VPS-Install/install.d/180-monit-install.sh
-/Users/emeric/Dev/VPS-Install/install.d/2-disable-root-login.sh
 /Users/emeric/Dev/VPS-Install/install.d/200-firewall-config.sh
 /Users/emeric/Dev/VPS-Install/install.d/202-fail2ban-install.sh
+/Users/emeric/Dev/VPS-Install/install.d/799-remove-root-access.sh
+/Users/emeric/Dev/VPS-Install/install.d/800-create-user.sh
 /Users/emeric/Dev/VPS-Install/install.d/820-lpe-website-install.sh
