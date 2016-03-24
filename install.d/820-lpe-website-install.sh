@@ -4,7 +4,6 @@
 config_app_name=lpe-website-install
 config_default_install=yes
 config_git_password=4BG29cbk7ZDk
-config_target=production
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
@@ -39,7 +38,10 @@ _d "[ssh cmd   = $SSHCMD]"
 #sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
 # sudo service nginx restart
 
-_re "mkdir -p /var/rest-api-server/${config_target}" "/var/rest-api-server/${config_target} created" "/var/rest-api-server/${config_target} creation failed"
-$SSHCMD "cd ~/ && rest-api-server && mkdir && ln -s /var/rest-api-server/${config_target} rest-api-server/"
+remotenodedir = "/var/rest-api-server/lespetitsentrepreneurs.com/${config_target}";
 
+_re "mkdir -p ${remotenodedir }" "${remotenodedir } created" "${remotenodedir } creation failed"
+$SSHCMD "cd ~/ && ln -s ${remotenodedir} rest-api-server"
 
+# Write target in user dir as an empty filename
+$SSHCMD "cd ~/ && touch ${target^^}"
