@@ -3,19 +3,10 @@
 # <START OF CONFIG>
 config_app_name=nginx-install
 config_default_install=yes
-config_nginx_domain_name=lespetitsentrepreneurs.com
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
 source "var.cfg" 2>&1 /dev/null
-
-config_nginx_root=/var/www/${config_nginx_domain_name}/${target}
-
-if [ "${target}" == "production" ]; then
-    config_nginx_server_name=${config_nginx_domain_name}
-else
-    config_nginx_server_name=${target}.${config_nginx_domain_name}
-fi
 
 function _escape {
     echo "$1" | sed -e 's/[\/&]/\\&/g'

@@ -3,7 +3,7 @@
 # <START OF CONFIG>
 config_app_name=lpe-website-install
 config_default_install=yes
-config_git_password=4BG29cbk7ZDk
+#config_git_password=4BG29cbk7ZDk
 # <END OF CONFIG>
 
 # required after <START OF CONFIG>/<END OF CONFIG> bloc
@@ -38,7 +38,7 @@ source "var.cfg" 2>&1 /dev/null
 #sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
 # sudo service nginx restart
 
-remotenodedir = "/var/rest-api-server/lespetitsentrepreneurs.com/${config_target}";
+remotenodedir = "/var/rest-api-server/lespetitsentrepreneurs.com/${target}";
 _re "mkdir -p /var/rest-api-server/${config_nginx_domain_name}/${target}" "/var/rest-api-server/${target} created" "/var/rest-api-server/${target} creation failed"
 _re "mkdir -p /tmp/${config_nginx_domain_name}/rest-api-server/${target}" "Dir for rsync server deploy created [/tmp/${config_nginx_domain_name}/rest-api-server/${target}]" "Could not create /tmp/${config_nginx_domain_name}/rest-api-server/${target}"
 $SSHCMD "cd ~/ && ln -s /var/rest-api-server/${target} rest-api-server/"

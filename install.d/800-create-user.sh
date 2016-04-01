@@ -12,7 +12,7 @@ source "var.cfg" 2>&1 /dev/null
 # Add a new user (username)
 userpassword=$($SSHCMD "pwgen -c -B 16 1")
 _d "user password: $userpassword"
-_re_exit "useradd --password ${userpassword} --home /home/${username} --create-home --gid users --groups users ${username}" "user [${username}] added" "failed to add user [${username}]"
+_re_exit "useradd --password ${userpassword} --home /home/${username} --shell /bin/bash --create-home --gid users --groups users ${username}" "user [${username}] added" "failed to add user [${username}]"
 _re "adduser ${username} sudo" "sudo power for ${username}" "failed to add ${username} to sudoers"
 
 # copy local ssh key to grant access without password if not already copied

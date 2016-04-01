@@ -29,9 +29,10 @@ declare -r INCLUDESDIR="$dir/includes"
 declare -r USRMINEDIR="$dir/usr-mine-bin"
 declare -r INSTALL_SCRIPTS_DIR="$dir/install.d"
 hostdir=''
-target='production'
+target=''
 install_cfg=''
 config_sshkeyfile="~/.ssh/id_rsa.pub"
+config_nginx_domain_name=lespetitsentrepreneurs.com
 
 # parse args from command line
 while [ "$1" != "" ] ; do
@@ -39,7 +40,7 @@ while [ "$1" != "" ] ; do
     case "$1" in
         -h|-help)
 	        #echo "Usage: $program [options] shortname hostname username sshport"
-            echo "Usage: $program [options] shortname hostname username"
+            echo "Usage: $program [options] shortname hostname username [target]"
             echo "  Options:"
             echo "      -d     : debug mode on."
             echo "      -h     : this help."
@@ -73,6 +74,18 @@ done
 #if [ "$shortname" = "" ]  || [ "$hostname" = "" ]  || [ "$username" = "" ] || [ "$sshport" = "" ]; then
 if [ "$shortname" = "" ]  || [ "$hostname" = "" ]  || [ "$username" = "" ] ; then
     _error_exit "Missing arguments, can't do anything. Use $program -help for more info."
+fi
+
+if [ "$target" == "" ]; then
+    target='production'
+fi
+
+config_nginx_root=/var/www/${config_nginx_domain_name}/${target}
+
+if [ "${target}" == "production" ]; then
+    config_nginx_server_name=${config_nginx_domain_name}
+else
+    config_nginx_server_name=${target}.${config_nginx_domain_name}
 fi
 
 # debug parameters
@@ -145,6 +158,10 @@ function _wconfig {
     echo "shortname=$shortname" >> "$var_cfg"
     echo "username=$username" >> "$var_cfg"
     echo "target=$target" >> "$var_cfg"
+
+    echo "config_nginx_domain_name=$config_nginx_domain_name" >> "$var_cfg"
+    echo "config_nginx_root=$config_nginx_root" >> "$var_cfg"
+    echo "config_nginx_server_name=$config_nginx_server_name" >> "$var_cfg"
 
     # keep logged data and moved to the fresly created dir
     mv "$dir/$logfile" "$hostdir/actions.log"

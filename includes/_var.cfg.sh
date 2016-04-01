@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 # import toolbox, then could use functions
 # first check if toolbox.sh is present
