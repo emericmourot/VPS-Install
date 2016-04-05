@@ -10,7 +10,7 @@ SERVER_IP="$(ip addr show eth0 | grep 'inet ' | cut -f2 | awk '{ print $2}')"
 DNS_SERVER="213.186.33.99"
 
 # Allow connections to this package servers
-PACKAGE_SERVER="bower.herokuapp.com registry.npmjs.org rpm.nodesource.com ikt.pm2.io github.com bitbucket.org nova.clouds.archive.ubuntu.com security.ubuntu.com"
+PACKAGE_SERVER="api.twitter.com bower.herokuapp.com registry.npmjs.org rpm.nodesource.com ikt.pm2.io github.com bitbucket.org nova.clouds.archive.ubuntu.com security.ubuntu.com"
 GITHUB_SERVER="192.30.252.128 192.30.252.129 192.30.252.130 192.30.252.131"
 
 echo "flush iptable rules"
