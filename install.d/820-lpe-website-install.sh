@@ -38,13 +38,15 @@ source "var.cfg" 2>&1 /dev/null
 #sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
 # sudo service nginx restart
 
-remotenodedir = "/var/rest-api-server/lespetitsentrepreneurs.com/${target}";
-_re "mkdir -p /var/rest-api-server/${config_nginx_domain_name}/${target}" "/var/rest-api-server/${target} created" "/var/rest-api-server/${target} creation failed"
-_re "mkdir -p /tmp/${config_nginx_domain_name}/rest-api-server/${target}" "Dir for rsync server deploy created [/tmp/${config_nginx_domain_name}/rest-api-server/${target}]" "Could not create /tmp/${config_nginx_domain_name}/rest-api-server/${target}"
-$SSHCMD "cd ~/ && ln -s /var/rest-api-server/${target} rest-api-server/"
+_re "mkdir -p /var/rest-api-server/${config_nginx_domain_name}/${target}" "/var/rest-api-server/${config_nginx_domain_name}/${target} created" "/var/rest-api-server/${config_nginx_domain_name}/${target} creation failed"
+if [ "${target}" == "production" ]; then
+ _re "mkdir -p /tmp/${config_nginx_domain_name}/rest-api-server/${target}" "Dir for rsync server deploy created [/tmp/${config_nginx_domain_name}/rest-api-server/${target}]" "Could not create /tmp/${config_nginx_domain_name}/rest-api-server/${target}"
+fi
+_re "cd ~/ && ln -s /var/rest-api-server/${config_nginx_domain_name}/${target} rest-api-server" "Symbolic link rest-api-server created" "Symbolic link rest-api-server creation failed"
 
-_re "mkdir -p ${remotenodedir }" "${remotenodedir } created" "${remotenodedir } creation failed"
-$SSHCMD "cd ~/ && ln -s ${remotenodedir} rest-api-server"
+# Set .pm2 folder location
+_re "export PM2_HOME=/var/rest-api-server/${config_nginx_domain_name}/${target}/.pm2 && mkdir /var/rest-api-server/${config_nginx_domain_name}/${target}/.pm2" ".pm2 folder created into rest-api-server folder" ".pm2 folder creation into rest-api-server folder failed"
+$SSHCMD "echo export PM2_HOME=/var/rest-api-server/${config_nginx_domain_name}/${target}/.pm2 >> ~/.profile"
 
 # Write target in user dir as an empty filename
-$SSHCMD "cd ~/ && touch ${target^^}"
+_re "touch ~/$(echo ${target} | tr '[:lower:]' '[:upper:]')" "Target flag [$(echo ${target} | tr '[:lower:]' '[:upper:]')] set" "Target flag [$(echo ${target} | tr '[:lower:]' '[:upper:]')] set failed"

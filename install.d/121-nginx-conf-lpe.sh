@@ -35,3 +35,5 @@ if [ "${target}" == "production" ]; then
 fi
 
 $SSHCMD "service nginx restart"
+
+_re "cd ~/ && ln -s ${config_nginx_root} www" "Symbolic link www created" "Symbolic link www creation failed"
