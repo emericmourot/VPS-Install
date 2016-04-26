@@ -5,8 +5,9 @@
 140-graphicsmagick-install.sh
 16-usrmine-install.sh
 180-monit-install.sh
-200-firewall-config.sh
-202-fail2ban-install.sh
-799-remove-root-access.sh
 800-create-user.sh
 822-discourse-install.sh
+908-remove-root-access.sh
+910-firewall-config.sh
+912-fail2ban-install.sh
+999-finalize.sh

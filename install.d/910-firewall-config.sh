@@ -25,8 +25,6 @@ source "var.cfg" 2>&1 /dev/null
 
 _copy2root "200-firewall-config/firewall" "/etc/init.d/firewall"
 $SSHCMD "chmod +x /etc/init.d/firewall"
-_copy2root "200-firewall-config/firewall-allowoutput" "/usr/mine/"
-$SSHCMD "chmod +x /usr/mine/firewall-allowoutput"
 
 # Activate rules
 $SSHCMD "/etc/init.d/firewall start"
