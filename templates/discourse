@@ -1,0 +1,12 @@
+1-ssh-addkey.sh
+10-hostinfo-get.sh
+12-dist-upgrade.sh
+14-ntpdate-install.sh
+140-graphicsmagick-install.sh
+16-usrmine-install.sh
+180-monit-install.sh
+200-firewall-config.sh
+202-fail2ban-install.sh
+799-remove-root-access.sh
+800-create-user.sh
+822-discourse-install.sh

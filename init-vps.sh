@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-##################################################################
-#                                                                #
-#                       Init VPS SSH                             #
-#                                                                #
-# Usage: vps-init [options] shortname hostname username [target] #
-#   Options:                                                     #
-#      -d      : debug mode on                                   #
-#      -h      : this help                                       #
-#      -p      : set ssh port (default 22) for creating access   #
-#      -nojava : do not install java                             #
-#      -debian : default is ubuntu                               #
-#                                                                #
-##################################################################
+###########################################################################
+#                                                                         #
+#                       Init VPS SSH                                      #
+#                                                                         #
+# Usage: vps-init [options] shortname hostname username [target template] #
+#   template is a preset of install scripts
+#   Options:                                                              #
+#      -d      : debug mode on                                            #
+#      -h      : this help                                                #
+#      -p      : set ssh port (default 22) for creating access            #
+#      -nojava : do not install java                                      #
+#      -debian : default is ubuntu                                        #
+#                                                                         #
+###########################################################################
 
 # boostrap by importing toolbox, then could use functions
 # first check if includes/toolbox.sh is present
@@ -28,8 +29,10 @@ dirname="${dir##*/}"
 declare -r INCLUDESDIR="$dir/includes"
 declare -r USRMINEDIR="$dir/usr-mine-bin"
 declare -r INSTALL_SCRIPTS_DIR="$dir/install.d"
+declare -r TEMPLATES_DIR="$dir/templates"
 hostdir=''
 target=''
+template=''
 install_cfg=''
 config_sshkeyfile="~/.ssh/id_rsa.pub"
 config_nginx_domain_name=lespetitsentrepreneurs.com
@@ -40,7 +43,7 @@ while [ "$1" != "" ] ; do
     case "$1" in
         -h|-help)
 	        #echo "Usage: $program [options] shortname hostname username sshport"
-            echo "Usage: $program [options] shortname hostname username [target]"
+            echo "Usage: $program [options] shortname hostname username [target template]"
             echo "  Options:"
             echo "      -d     : debug mode on."
             echo "      -h     : this help."
@@ -61,6 +64,8 @@ while [ "$1" != "" ] ; do
                 username="$1"
             elif [ "$target" = "" ] ; then
                 target="$1"
+            elif [ "$template" = "" ] ; then
+                template="$1"
             else
                 # drop
                 extra="$extra $1";
@@ -92,11 +97,19 @@ fi
 _d "[hostname     = $hostname]"
 _d "[username     = $username]"
 _d "[target       = $target]"
+_d "[template     = $template]"
 _d "[dir          = $dir]"
 _d "[dirname      = $dirname]"
 _d "[log file     = $logfile] "
 _d "[includes dir = $INCLUDESDIR] "
 _d "[scripts dir  = $INSTALL_SCRIPTS_DIR] "
+
+# check template
+if [ ! -z "$template" && ! -f "$TEMPLATES_DIR/$template" ] ; then
+    _error_exit "Invalid template file [$template]."
+else
+    _d "Template file [$template] is ok"
+fi
 
 # write config by reading default options in each install.d scripts
 # copy scripts from install.d
@@ -175,7 +188,7 @@ function _wconfig {
     # get all files in install.d dir and gather config for each
     for file in "$INSTALL_SCRIPTS_DIR"/*.sh
     do
-        _d "Processing $file"
+        filename=$(basename "$file")
         if [ -f "$file" ] ; then
 
            app_name=$(_readconfig $file "config_app_name")
@@ -185,21 +198,30 @@ function _wconfig {
                 _error_exit "config_app_name or config_default_install not declared in $file"
             fi
 
-            echo "#-------------------------------------------------------------------------" >> "$install_cfg"
-            echo "# $app_name" >> "$install_cfg"
-            echo "#-------------------------------------------------------------------------" >> "$install_cfg"
-            echo "$SOC - $app_name" >> "$install_cfg"
-            _copyconfig $file $install_cfg
-            echo "$EOC - $app_name" >> "$install_cfg"
-            echo "" >> "$install_cfg"
+            # install script in template ?
+            willinstall=1
+            if [ -z $(grep "$filename" "$TEMPLATES_DIR/$template") ]; then
+                willinstall=0
+            fi
 
-            # copy all scripts into this new dir
-            cp $file $hostdir
-            chmod u+x ${file}
-	    if [ -d "${file/.sh//}" ]; then
-              cp -r "${file/.sh/}" $hostdir
-	    fi
-            echo "${file}" >> "$hostdir/install.sh"
+            if [ "${willinstall}" == "1" ] ; then
+                _d "Processing $filename"
+                echo "#-------------------------------------------------------------------------" >> "$install_cfg"
+                echo "# $app_name" >> "$install_cfg"
+                echo "#-------------------------------------------------------------------------" >> "$install_cfg"
+                echo "$SOC - $app_name" >> "$install_cfg"
+                _copyconfig $file $install_cfg
+                echo "$EOC - $app_name" >> "$install_cfg"
+                echo "" >> "$install_cfg"
+
+                # copy all scripts into this new dir
+                cp $file $hostdir
+                chmod u+x ${file}
+                if [ -d "${file/.sh//}" ]; then
+                    cp -r "${file/.sh/}" $hostdir
+                fi
+                echo "${file}" >> "$hostdir/install.sh"
+            fi
         fi
     done
 
@@ -212,7 +234,6 @@ function _wconfig {
 
     # add useful functions
     cat "$INCLUDESDIR/_var.cfg.sh" >> "$var_cfg"
-
 }
 
 # create dedicated directory, copy and generate stuff
