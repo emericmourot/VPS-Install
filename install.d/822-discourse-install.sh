@@ -9,7 +9,7 @@ config_default_install=yes
 source "var.cfg" 2>&1 /dev/null
 
 # Force to allow all outgoing connexions
-$SSHCMD "/usr/mine/firewall stop"
+$SSHCMD "/etc/init.d/firewall stop"
 
 _re "mkdir /var/discourse && git clone https://github.com/discourse/discourse_docker.git /var/discourse" "Discourse files cloned" "Discourse files clone failed"
 _copy2root "822-discourse-install/app.yml" "/var/discourse/containers/"
