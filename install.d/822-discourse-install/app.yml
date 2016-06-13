@@ -15,7 +15,7 @@ templates:
 ## Uncomment these two lines if you wish to add Lets Encrypt (https)
   #- "templates/web.ssl.template.yml"
   #- "templates/web.letsencrypt.ssl.template.yml"
- 
+
 ## which TCP/IP ports should this container expose?
 ## If you want Discourse to share a port with another webserver like Apache or nginx,
 ## see https://meta.discourse.org/t/17247 for details
@@ -28,42 +28,42 @@ params:
 
   ## Set db_shared_buffers to a max of 25% of the total memory.
   ## will be set automatically by bootstrap based on detected RAM, or you can override
-  db_shared_buffers: "512MB"
-  
+  db_shared_buffers: "256MB"
+
   ## can improve sorting performance, but adds memory usage per-connection
   #db_work_mem: "40MB"
-  
+
   ## Which Git revision should this container use? (default: tests-passed)
   #version: tests-passed
 
 env:
-  LANG: fr_FR.UTF-8
-  DISCOURSE_DEFAULT_LOCALE: fr
+  LANG: en_US.UTF-8
+  # DISCOURSE_DEFAULT_LOCALE: en
 
   ## How many concurrent web requests are supported? Depends on memory and CPU cores.
   ## will be set automatically by bootstrap based on detected CPUs, or you can override
   UNICORN_WORKERS: 4
 
-  ## TODO: List of comma delimited emails that will be made admin and developer
-  ## on initial signup example 'user1@example.com,user2@example.com'
-  DISCOURSE_DEVELOPER_EMAILS: 'dev@lespetitsentrepreneurs.com,emeric.mourot@gmail.com'
-
   ## TODO: The domain name this Discourse instance will respond to
-  DISCOURSE_HOSTNAME: 'forum-discourse.lespetitsentrepreneurs.com'
-  
+  DISCOURSE_HOSTNAME: forum-discourse.lespetitsentrepreneurs.com
+
   ## Uncomment if you want the container to be started with the same
   ## hostname (-h option) as specified above (default "$hostname-$config")
   #DOCKER_USE_HOSTNAME: true
 
+  ## TODO: List of comma delimited emails that will be made admin and developer
+  ## on initial signup example 'user1@example.com,user2@example.com'
+  DISCOURSE_DEVELOPER_EMAILS: 'emeric.mourot@gmail.com,emeric@lespetitsentrepreneurs.com'
+
   ## TODO: The SMTP mail server used to validate new accounts and send notifications
-  DISCOURSE_SMTP_ADDRESS: mail.gandi.net # required
-  DISCOURSE_SMTP_PORT: 587                        # (optional, default 587)
-  DISCOURSE_SMTP_USER_NAME: dev@lespetitsentrepreneurs.com # required
-  DISCOURSE_SMTP_PASSWORD: LW6STCMhDiwLfEpN # required, WARNING the char '#' in pw can cause problems!
+  DISCOURSE_SMTP_ADDRESS: mail.gandi.net
+  DISCOURSE_SMTP_PORT: 587
+  DISCOURSE_SMTP_USER_NAME: dev@lespetitsentrepreneurs.com
+  DISCOURSE_SMTP_PASSWORD: LW6STCMhDiwLfEpN
   DISCOURSE_SMTP_ENABLE_START_TLS: true           # (optional, default true)
-  
+
   ## If you added the Lets Encrypt template, uncomment below to get a free SSL certificate
-  #LETSENCRYPT_ACCOUNT_EMAIL: your.email@example.com
+  #LETSENCRYPT_ACCOUNT_EMAIL: me@example.com
 
   ## The CDN address for this Discourse instance (configured to pull)
   ## see https://meta.discourse.org/t/14857 for details
@@ -87,6 +87,7 @@ hooks:
         cmd:
           - git clone https://github.com/discourse/docker_manager.git
           - git clone https://github.com/auth0/discourse-plugin.git auth0
+          - git clone https://github.com/TheBunyip/discourse-allow-same-origin.git
           - git clone https://github.com/discourse/discourse-tagging.git
 
 ## Any custom commands to run after building
